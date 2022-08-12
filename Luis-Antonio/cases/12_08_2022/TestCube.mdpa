@@ -1,0 +1,123 @@
+Begin ModelPartData
+//  VARIABLE_NAME value
+End ModelPartData
+
+Begin Properties 0
+End Properties
+Begin Nodes
+    1  -0.0000000000   0.0010000000   0.0020000000
+    2  -0.0000000000   0.0010000000   0.0010000000
+    3   0.0000000000   0.0000000000   0.0020000000
+    4   0.0010000000   0.0010000000   0.0020000000
+    5   0.0000000000   0.0000000000   0.0010000000
+    6   0.0010000000   0.0010000000   0.0010000000
+    7   0.0010000000   0.0000000000   0.0020000000
+    8   0.0010000000   0.0000000000   0.0010000000
+    9  -0.0000000000   0.0010000000   0.0000000000
+   10   0.0020000000   0.0010000000   0.0020000000
+   11   0.0010000000   0.0010000000   0.0000000000
+   12   0.0000000000   0.0000000000   0.0000000000
+   13   0.0020000000   0.0010000000   0.0010000000
+   14   0.0020000000   0.0000000000   0.0020000000
+   15   0.0010000000   0.0000000000   0.0000000000
+   16   0.0020000000   0.0000000000   0.0010000000
+   17   0.0020000000   0.0010000000   0.0000000000
+   18   0.0020000000   0.0000000000   0.0000000000
+End Nodes
+
+
+Begin Elements SmallDisplacementElement3D8N// GUI group identifier: Body
+        1          0     6     2     9    11     8     5    12    15 
+        2          0    13     6    11    17    16     8    15    18 
+        3          0     4     1     2     6     7     3     5     8 
+        4          0    10     4     6    13    14     7     8    16 
+End Elements
+
+Begin SubModelPart GENERIC_Layer1 // Group Layer1 // Subtree GENERIC
+    Begin SubModelPartNodes
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+           10
+           13
+           14
+           16
+    End SubModelPartNodes
+    Begin SubModelPartElements
+            3
+            4
+    End SubModelPartElements
+    Begin SubModelPartConditions
+    End SubModelPartConditions
+End SubModelPart
+Begin SubModelPart GENERIC_Layer2 // Group Layer2 // Subtree GENERIC
+    Begin SubModelPartNodes
+            2
+            5
+            6
+            8
+            9
+           11
+           12
+           13
+           15
+           16
+           17
+           18
+    End SubModelPartNodes
+    Begin SubModelPartElements
+            1
+            2
+    End SubModelPartElements
+    Begin SubModelPartConditions
+    End SubModelPartConditions
+End SubModelPart
+Begin SubModelPart Parts_Solid_Body // Group Body // Subtree Parts_Solid
+    Begin SubModelPartNodes
+            1
+            2
+            3
+            4
+            5
+            6
+            7
+            8
+            9
+           10
+           11
+           12
+           13
+           14
+           15
+           16
+           17
+           18
+    End SubModelPartNodes
+    Begin SubModelPartElements
+            1
+            2
+            3
+            4
+    End SubModelPartElements
+    Begin SubModelPartConditions
+    End SubModelPartConditions
+End SubModelPart
+Begin SubModelPart DISPLACEMENT_BC // Group BC // Subtree DISPLACEMENT
+    Begin SubModelPartNodes
+            1
+            2
+            3
+            5
+            9
+           12
+    End SubModelPartNodes
+    Begin SubModelPartElements
+    End SubModelPartElements
+    Begin SubModelPartConditions
+    End SubModelPartConditions
+End SubModelPart

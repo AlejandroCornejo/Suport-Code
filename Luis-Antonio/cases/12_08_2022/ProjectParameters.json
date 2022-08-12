@@ -1,0 +1,149 @@
+{
+    "problem_data"     : {
+        "problem_name"  : "TestCube",
+        "parallel_type" : "OpenMP",
+        "echo_level"    : 1,
+        "start_time"    : 0.0,
+        "end_time"      : 1.0
+    },
+    "solver_settings"  : {
+        "time_stepping"                   : {
+            "time_step" : 1.1
+        },
+        "solver_type"                     : "Static",
+        "model_part_name"                 : "Structure",
+        "domain_size"                     : 3,
+        "echo_level"                      : 1,
+        "analysis_type"                   : "non_linear",
+        "model_import_settings"           : {
+            "input_type"     : "mdpa",
+            "input_filename" : "TestCube"
+        },
+        "material_import_settings"        : {
+            "materials_filename" : "StructuralMaterials.json"
+        },
+        "line_search"                     : false,
+        "convergence_criterion"           : "residual_criterion",
+        "displacement_relative_tolerance" : 0.0001,
+        "displacement_absolute_tolerance" : 1e-9,
+        "residual_relative_tolerance"     : 0.0001,
+        "residual_absolute_tolerance"     : 1e-9,
+        "max_iteration"                   : 10,
+        "rotation_dofs"                   : false,
+        "volumetric_strain_dofs"          : false
+    },
+    "processes"        : {
+        "constraints_process_list" : [{
+            "python_module" : "assign_vector_variable_process",
+            "kratos_module" : "KratosMultiphysics",
+            "process_name"  : "AssignVectorVariableProcess",
+            "Parameters"    : {
+                "model_part_name" : "Structure.DISPLACEMENT_BC",
+                "variable_name"   : "DISPLACEMENT",
+                "interval"        : [0.0,"End"],
+                "constrained"     : [true,true,true],
+                "value"           : [0.0,0.0,0.0]
+            }
+        }],
+        "loads_process_list"       : [],
+        "list_other_processes"     : [{
+            "python_module" : "set_automated_initial_stress_process",
+            "kratos_module" : "KratosMultiphysics.StructuralMechanicsApplication",
+            "process_name"  : "SetAutomatedInitialStressProcess",
+            "Parameters"    : {
+                "help"                     : "This sets the initial conditions in terms of imposed strain, stress or deformation gradient",
+                "model_part_name"          : "Structure.GENERIC_Layer1",
+                "hole_generatrix_axis"     : [0.0,0.0,1.0],
+                "hole_generatrix_point"    : [0.0,0.0,0.0],
+                "hole_radius_offset"       : 0.0,
+                "initial_stress_table"     : {
+                            "name"             : "csv_table",
+                            "filename"         : "Layer1_StressComp1.csv",
+                            "delimiter"        : ",",
+                            "skiprows"         : 1,
+                            "first_column_id"  : 0,
+                            "second_column_id" : 1,
+                            "table_id"         : 0,
+                            "na_replace"       : 0.0
+                        }
+                    }
+            },{
+                "python_module" : "set_initial_state_process",
+                "kratos_module" : "KratosMultiphysics",
+                "process_name"  : "set_initial_state_process",
+                "Parameters"    : {
+                    "mesh_id"         : 0,
+                    "model_part_name" : "Structure.GENERIC_Layer1",
+                        "dimension"       : 3,
+                        "imposed_stress"  : [0.0,0.0,0.0,0.0,0.0,0.0],
+                        "interval"        : [0.0, 1e30]
+                }
+            },{
+                "python_module" : "set_automated_initial_stress_process",
+                "kratos_module" : "KratosMultiphysics.StructuralMechanicsApplication",
+                "process_name"  : "SetAutomatedInitialStressProcess",
+                "Parameters"    : {
+                    "help"                     : "This sets the initial conditions in terms of imposed strain, stress or deformation gradient",
+                    "model_part_name"          : "Structure.GENERIC_Layer2",
+                    "hole_generatrix_axis"     : [0.0,0.0,1.0],
+                    "hole_generatrix_point"    : [0.0,0.0,0.0],
+                    "hole_radius_offset"       : 0.0,
+                    "initial_stress_table"     : {
+                                "name"             : "csv_table",
+                                "filename"         : "Layer2_StressComp1.csv",
+                                "delimiter"        : ",",
+                                "skiprows"         : 1,
+                                "first_column_id"  : 0,
+                                "second_column_id" : 1,
+                                "table_id"         : 0,
+                                "na_replace"       : 0.0
+                            }
+                        }
+                },{
+                    "python_module" : "set_initial_state_process",
+                    "kratos_module" : "KratosMultiphysics",
+                    "process_name"  : "set_initial_state_process",
+                    "Parameters"    : {
+                        "mesh_id"         : 0,
+                        "model_part_name" : "Structure.GENERIC_Layer2",
+                            "dimension"       : 3,
+                            "imposed_stress"  : [0.0,0.0,0.0,0.0,0.0,0.0],
+                            "interval"        : [0.0, 1e30]
+                    }
+                }]
+    },
+    "output_processes" : {
+        "gid_output" : [{
+            "python_module" : "gid_output_process",
+            "kratos_module" : "KratosMultiphysics",
+            "process_name"  : "GiDOutputProcess",
+            "Parameters"    : {
+                "model_part_name"        : "Structure",
+                "postprocess_parameters" : {
+                    "result_file_configuration" : {
+                        "gidpost_flags"               : {
+                            "GiDPostMode"           : "GiD_PostBinary",
+                            "WriteDeformedMeshFlag" : "WriteDeformed",
+                            "WriteConditionsFlag"   : "WriteConditions",
+                            "MultiFileFlag"         : "SingleFile"
+                        },
+                        "file_label"                  : "step",
+                        "output_control_type"         : "step",
+                        "output_interval"             : 1,
+                        "body_output"                 : true,
+                        "node_output"                 : false,
+                        "skin_output"                 : false,
+                        "plane_output"                : [],
+                        "nodal_results"               : ["DISPLACEMENT","REACTION"],
+                        "gauss_point_results"         : ["VON_MISES_STRESS","CAUCHY_STRESS_TENSOR"],
+                        "nodal_nonhistorical_results" : []
+                    },
+                    "point_data_configuration"  : []
+                },
+                "output_name"            : "gid_output/TestCube"
+            }
+        }],
+        "vtk_output" : []
+    },
+    "analysis_stage"   : "KratosMultiphysics.StructuralMechanicsApplication.structural_mechanics_analysis"
+}
