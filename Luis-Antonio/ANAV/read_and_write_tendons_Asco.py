@@ -2,6 +2,18 @@
 
 """
 Este fichero se emplea para leer el archivo de intersecciones y escribe los bloques de elementos de acuerdo con las familias H, V y DF
+
+Begin SubModelPart tendon_Cup
+  Begin SubModelPartTables
+  End SubModelPartTables
+  Begin SubModelPartNodes
+  End SubModelPartNodes
+  Begin SubModelPartElements
+  End SubModelPartElements
+  Begin SubModelPartConditions
+  End SubModelPartConditions
+End SubModelPart
+
 """
 
 input_name = "Asco_I.intersections"
@@ -36,34 +48,66 @@ for line in lines:
             elif tendon_name[7] == "D":
                 cupula_elems.append(id_elem)
 print("Escribiendo elementos...")
-output_file.write("\n \n Elementos Tendones Horizontales: \n \n")
+
+output_file.write("Begin SubModelPart tendon_H \n")
+output_file.write("Begin SubModelPartTables \n")
+output_file.write("End SubModelPartTables \n")
+output_file.write("Begin SubModelPartNodes \n")
+output_file.write("End SubModelPartNodes \n")
+output_file.write("Begin SubModelPartElements \n" )
 
 colum = 0
 for elem in horizontal_elems:
     output_file.write("  " + str(elem))
     colum += 1
-    if colum == 30:
+    if colum == 300:
         output_file.write("\n")
         colum = 0
 
-output_file.write("\n \n Elementos Tendones Verticales: \n \n")
+output_file.write("\nEnd SubModelPartElements \n")
+output_file.write("Begin SubModelPartConditions \n")
+output_file.write("End SubModelPartConditions \n")
+output_file.write("End SubModelPart \n \n")
+
+output_file.write("Begin SubModelPart tendon_V \n")
+output_file.write("Begin SubModelPartTables \n")
+output_file.write("End SubModelPartTables \n")
+output_file.write("Begin SubModelPartNodes \n")
+output_file.write("End SubModelPartNodes \n")
+output_file.write("Begin SubModelPartElements \n" )
+
 colum = 0
 for elem in vertical_elems:
     output_file.write("  " + str(elem))
     colum += 1
-    if colum == 30:
+    if colum == 300:
         output_file.write("\n")
         colum = 0
 
-output_file.write("\n \n Elementos Tendones Cupula: \n \n")
+output_file.write("\nEnd SubModelPartElements \n")
+output_file.write("Begin SubModelPartConditions \n")
+output_file.write("End SubModelPartConditions \n")
+output_file.write("End SubModelPart \n \n")
+
+output_file.write("Begin SubModelPart tendon_Cup \n")
+output_file.write("Begin SubModelPartTables \n")
+output_file.write("End SubModelPartTables \n")
+output_file.write("Begin SubModelPartNodes \n")
+output_file.write("End SubModelPartNodes \n")
+output_file.write("Begin SubModelPartElements \n" )
 
 colum = 0
 for elem in cupula_elems:
     output_file.write("  " + str(elem))
     colum += 1
-    if colum == 30:
+    if colum == 300:
         output_file.write("\n")
         colum = 0
+
+output_file.write("\nEnd SubModelPartElements \n")
+output_file.write("Begin SubModelPartConditions \n")
+output_file.write("End SubModelPartConditions \n")
+output_file.write("End SubModelPart \n \n")
 
 input_file.close()
 output_file.close()
