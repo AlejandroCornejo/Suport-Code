@@ -52,14 +52,16 @@ class AddTextureNormalDistributionProcess(KM.Process):
         self.print_coords = settings["print_modified_coordinates"].GetBool()
         self.echo = settings["echo_level"].GetInt()
         self.file_name = settings["backup_coordinates_file_name"].GetString()
+        self.file_already_exists = Path(self.file_name).is_file()
 
-        ascii_writer_params = KM.Parameters("""{}""")
-        ascii_writer_params.AddValue("file_name", settings["backup_coordinates_file_name"])
-        ascii_writer_params.AddValue("output_path", settings["output_path"])
-        ascii_writer_params.AddEmptyValue("file_extension")
-        ascii_writer_params["file_extension"].SetString(Path(self.file_name).suffix)
-        header = "# In this file we print the used perturbed coordinates of the nodes:" + "\n\n" + "Id		X            Y           Z\n"
-        self.ascii_writer = AsciiWriter.TimeBasedAsciiFileWriterUtility(self.model_part, ascii_writer_params, header).file
+        if not self.file_already_exists:
+            ascii_writer_params = KM.Parameters("""{}""")
+            ascii_writer_params.AddValue("file_name", settings["backup_coordinates_file_name"])
+            ascii_writer_params.AddValue("output_path", settings["output_path"])
+            ascii_writer_params.AddEmptyValue("file_extension")
+            ascii_writer_params["file_extension"].SetString(Path(self.file_name).suffix)
+            header = "# In this file we print the used perturbed coordinates of the nodes:" + "\n\n" + "Id		X            Y           Z\n"
+            self.ascii_writer = AsciiWriter.TimeBasedAsciiFileWriterUtility(self.model_part, ascii_writer_params, header).file
 
         if len(self.model_part.Conditions) == 0:
             raise RuntimeError('The provided submodelpart does not include any condition...')
@@ -71,34 +73,56 @@ class AddTextureNormalDistributionProcess(KM.Process):
         Keyword arguments:
         self -- It signifies an instance of a class.
         """
-        # Here we compute the normal field
-        normal_calculation_utils = KM.NormalCalculationUtils()
-        normal_calculation_utils.CalculateUnitNormalsNonHistorical(self.model_part, 3)
-        number_nodes = len(self.model_part.Nodes)
-        normal = KM.Array3([0,0,0])
+        if not self.file_already_exists:
+            # Here we compute the normal field
+            normal_calculation_utils = KM.NormalCalculationUtils()
+            normal_calculation_utils.CalculateUnitNormalsNonHistorical(self.model_part, 3)
+            number_nodes = len(self.model_part.Nodes)
+            normal = KM.Array3([0,0,0])
 
-        # We generate a random normal distribution
-        norm_distr = np.random.normal(self.mu, self.sigma, number_nodes)
-        counter = 0
+            # We generate a random normal distribution
+            norm_distr = np.random.normal(self.mu, self.sigma, number_nodes)
+            counter = 0
 
-        # We modify the initial coordinates of the nodes to generate the new texture
-        for node in self.model_part.Nodes:
-            normal = node.GetValue(KM.NORMAL)
-            node.X0 += norm_distr[counter] * normal[0]
-            node.Y0 += norm_distr[counter] * normal[1]
-            node.Z0 += norm_distr[counter] * normal[2]
-            node.X  += norm_distr[counter] * normal[0]
-            node.Y  += norm_distr[counter] * normal[1]
-            node.Z  += norm_distr[counter] * normal[2]
-            counter += 1
-            if self.print_coords:
-                # Now we print a backup of the nodes coordinates used in the simulation
-                if counter == 1:
-                    self.ascii_writer.write("The applied distribution has a mean of " + "{0:.4e}".format(np.mean(norm_distr)).rjust(11) + " and a standard deviation of " + "{0:.4e}".format(np.std(norm_distr)).rjust(11) + "\n\n")
-                self.ascii_writer.write(str(node.Id)+ "\t\t")
-                self.ascii_writer.write("{0:.4e}".format(node.X0).rjust(11) + "\t")
-                self.ascii_writer.write("{0:.4e}".format(node.Y0).rjust(11) + "\t")
-                self.ascii_writer.write("{0:.4e}".format(node.Z0).rjust(11) + "\n")
+            # We modify the initial coordinates of the nodes to generate the new texture
+            for node in self.model_part.Nodes:
+                normal = node.GetValue(KM.NORMAL)
+                node.X0 += norm_distr[counter] * normal[0]
+                node.Y0 += norm_distr[counter] * normal[1]
+                node.Z0 += norm_distr[counter] * normal[2]
+                node.X  += norm_distr[counter] * normal[0]
+                node.Y  += norm_distr[counter] * normal[1]
+                node.Z  += norm_distr[counter] * normal[2]
+                counter += 1
+                if self.print_coords:
+                    # Now we print a backup of the nodes coordinates used in the simulation
+                    if counter == 1:
+                        self.ascii_writer.write("The applied distribution has a mean of " + "{0:.4e}".format(np.mean(norm_distr)).rjust(11) + " and a standard deviation of " + "{0:.4e}".format(np.std(norm_distr)).rjust(11) + "\n\n")
+                    self.ascii_writer.write(str(node.Id)+ "\t\t")
+                    self.ascii_writer.write("{0:.4e}".format(node.X0).rjust(11) + "\t")
+                    self.ascii_writer.write("{0:.4e}".format(node.Y0).rjust(11) + "\t")
+                    self.ascii_writer.write("{0:.4e}".format(node.Z0).rjust(11) + "\n")
+        else:
+            print("\nADD TEXTURE PROCESS::WARNING:: The perturbation corrdinates file already exists, reading previus info...\n")
+            # We only apply the perturbation produced previously
+            input_file  = open(self.file_name, "r")
+            lines = input_file.readlines()
+            for line in lines:
+                split_line = line.split()
+                if len(split_line) > 0:
+                    if str.isdigit(split_line[0]):
+                        node_id = int(split_line[0])
+                        node_x  = float(split_line[1])
+                        node_y  = float(split_line[2])
+                        node_z  = float(split_line[3])
+                        node = self.model_part.GetNode(node_id)
+                        node.X0 = node_x
+                        node.Y0 = node_y
+                        node.Z0 = node_z
+                        node.X  = node_x
+                        node.Y  = node_y
+                        node.Z  = node_z
+
 
 
 
