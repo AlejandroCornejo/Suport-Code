@@ -47,6 +47,8 @@ plt.plot(x3, y3, "c+", label = "1 Way, dt=1e-5 s", linewidth=2)
 x3, y3 = ReadDataFromFile("data/1w_5e-6.txt")
 plt.plot(x3, y3, "k+", label = "1 Way, dt=5e-6 s", linewidth=2)
 
+# markersize=10
+
 # Constant values
 # x = numpy.arange(10,20,0.2)
 # y = 80*numpy.ones(len(x), dtype=float)
