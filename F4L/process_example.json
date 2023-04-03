@@ -1,0 +1,12 @@
+{
+	"python_module" : "add_texture_normal_distribution_process",
+	"kratos_module" : "KratosMultiphysics.ConstitutiveLawsApplication",
+	"process_name"  : "AddTextureNormalDistributionProcess",
+	"Parameters"    : {
+		"model_part_name" : "Structure.SurfacePressure3D_Pressure_on_surfaces_Auto1", // submodel must include surface conditions, apply dummy pressure for example
+		"normal_mu"                  : 0.0,
+		"normal_sigma"               : 0.05,
+		"print_modified_coordinates" : true,
+		"echo_level"                 : 1
+	}
+}
