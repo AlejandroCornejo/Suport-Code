@@ -3,7 +3,7 @@
 https://www.youtube.com/watch?v=bxe2T-V8XRs&list=PLiaHhY2iBX9hdHaRr6b7XevZtgZRa1PoU&index=1
 https://www.youtube.com/watch?v=UJwK6jAStmg&list=PLiaHhY2iBX9hdHaRr6b7XevZtgZRa1PoU&index=2
 
-
+Artificial neural network with only one hidden layer of "n" neurons.
 '''
 
 import numpy as np
@@ -19,8 +19,6 @@ class NeuralNetwork(object):
         # Weights matrices wij^(1) and wij^(2)
         self.w1 = np.random.randn(self.input_layer_size,  self.hidden_layer_size)  # 1x4
         self.w2 = np.random.randn(self.hidden_layer_size, self.output_layer_size)  # 4x1
-        # self.w1 = np.zeros((self.input_layer_size,  self.hidden_layer_size))  # 1x4
-        # self.w2 = np.zeros((self.hidden_layer_size, self.output_layer_size))  # 4x1
 
         # derivative of the cost function J with respect to the weights
         self.dJ_dw1  = np.zeros((self.input_layer_size,  self.hidden_layer_size))
@@ -67,29 +65,29 @@ y_max = y.max()
 x = x / x_max
 y = y / y_max
 # plot reference data
-pl.plot(x, y, "b +")
+pl.plot(x, y, "b +", label = "Data")
 
 # now we plot the first estimation...
 neural_network = NeuralNetwork()
 y_hat = neural_network.Forward(x)
-pl.plot(x, y_hat, color="k", linewidth=5)
+pl.plot(x, y_hat, color="k", linewidth=5, label = "Initial guess")
 
 current_accumulated_error = neural_network.AccumulatedError_J(y, y_hat)
 
 # now we start training...
-perturbation  = 1.0e-12  # for computing the grandients
+perturbation  = 1.0e-8  # for computing the grandients
 
-steepest_descent_factor = 1e-2 # for updating the weights
+steepest_descent_factor = 1e-5 # For updating the weights
 
 # Convergence parameters
-tolerance = 1.0e-11
+tolerance = 1.0e-6
 iteration = 0
-max_iter = 2000
+max_iter = 5000
 old_accumulated_error = 1.0
 relative_error = 1.0
 
-# interval of echo
-interval_iter_print = 50
+# interval of print info stream and plot
+interval_iter_print = 10 # iterations
 print_counter = 0
 
 while relative_error > tolerance and iteration < max_iter:
@@ -126,10 +124,15 @@ while relative_error > tolerance and iteration < max_iter:
     print_counter += 1
     if print_counter > interval_iter_print:
         print(" ## Iteration: ", iteration)
-        print("    The current relative_error is: ", relative_error)
-        print("    The current_accumulated_error is: ", current_accumulated_error, "\n")
+        print("    The current relative_error is:    ", "{0:.4e}".format(relative_error).rjust(11))
+        print("    The current_accumulated_error is: ", "{0:.4e}".format(current_accumulated_error).rjust(11), "\n")
         print_counter = 0
         pl.plot(x, y_hat, color="r")
 
-pl.plot(x, y_hat, color="g", linewidth=5)
+
+pl.xlabel('x', fontsize = 12)
+pl.ylabel('y', fontsize = 12)
+pl.plot(x, y_hat, color="g", linewidth=5, label="Final result")
+pl.legend(fontsize = 13)
+pl.grid()
 pl.show()
