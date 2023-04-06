@@ -77,16 +77,14 @@ pl.plot(x, y_hat, color="k", linewidth=5)
 current_accumulated_error = neural_network.AccumulatedError_J(y, y_hat)
 
 # now we start training...
-
-
 perturbation  = 1.0e-12  # for computing the grandients
 
 steepest_descent_factor = 1e-2 # for updating the weights
 
 # Convergence parameters
-tolerance = 1.0e-12
+tolerance = 1.0e-11
 iteration = 0
-max_iter = 1000
+max_iter = 2000
 old_accumulated_error = 1.0
 relative_error = 1.0
 
@@ -132,7 +130,6 @@ while relative_error > tolerance and iteration < max_iter:
         print("    The current_accumulated_error is: ", current_accumulated_error, "\n")
         print_counter = 0
         pl.plot(x, y_hat, color="r")
-        # pl.show()
 
 pl.plot(x, y_hat, color="g", linewidth=5)
 pl.show()
