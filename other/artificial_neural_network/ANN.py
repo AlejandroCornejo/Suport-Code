@@ -14,7 +14,7 @@ class NeuralNetwork(object):
         # We define Hyperparameters
         self.input_layer_size  = 1  # one dimensional input
         self.output_layer_size = 1  # one dimensional output
-        self.hidden_layer_size = 100  # number of hidden neurons
+        self.hidden_layer_size = 200  # number of hidden neurons
 
         # Weights matrices wij^(1) and wij^(2)
         self.w1 = np.random.randn(self.input_layer_size,  self.hidden_layer_size)  # 1x4
@@ -58,7 +58,7 @@ class NeuralNetwork(object):
 
 
 # We define the raw data
-x = np.transpose(np.array(([np.linspace(-10,10,20)]), dtype=float)) # needs to be an array with 2 dimensions
+x = np.transpose(np.array(([np.linspace(-10,10,50)]), dtype=float)) # needs to be an array with 2 dimensions
 y = x**2
 
 # We scale the data...
@@ -77,8 +77,25 @@ pl.plot(x, y_hat, color="k", linewidth=5)
 current_accumulated_error = neural_network.AccumulatedError_J(y, y_hat)
 
 # now we start training...
-perturbation = 1.0e-5
-for iteration in range(500):
+
+
+perturbation  = 1.0e-12  # for computing the grandients
+
+steepest_descent_factor = 1e-2 # for updating the weights
+
+# Convergence parameters
+tolerance = 1.0e-12
+iteration = 0
+max_iter = 1000
+old_accumulated_error = 1.0
+relative_error = 1.0
+
+# interval of echo
+interval_iter_print = 50
+print_counter = 0
+
+while relative_error > tolerance and iteration < max_iter:
+    iteration += 1
     # compute gradients of the wij^(1)
     rows, cols = neural_network.w1.shape
     for i in range(rows):
@@ -100,20 +117,22 @@ for iteration in range(500):
             neural_network.dJ_dw2[i,j] = (perturbed_accum_error - current_accumulated_error) / perturbation
 
     # now we update the weights ==> Learning...
-    steepest_descent_factor = 0.001
     neural_network.w1 -= neural_network.dJ_dw1 * steepest_descent_factor
     neural_network.w2 -= neural_network.dJ_dw2 * steepest_descent_factor
 
-    # neural_network.PrintWeights()
-    # neural_network.PrintGradients()
-
     y_hat = neural_network.Forward(x)
     current_accumulated_error = neural_network.AccumulatedError_J(y, y_hat)
-    print(current_accumulated_error)
+    relative_error = np.abs((old_accumulated_error - current_accumulated_error) / current_accumulated_error)
+    old_accumulated_error = current_accumulated_error
 
-    # print(y_hat)
-    pl.plot(x, y_hat, color="r")
+    print_counter += 1
+    if print_counter > interval_iter_print:
+        print(" ## Iteration: ", iteration)
+        print("    The current relative_error is: ", relative_error)
+        print("    The current_accumulated_error is: ", current_accumulated_error, "\n")
+        print_counter = 0
+        pl.plot(x, y_hat, color="r")
+        # pl.show()
 
 pl.plot(x, y_hat, color="g", linewidth=5)
-
 pl.show()
