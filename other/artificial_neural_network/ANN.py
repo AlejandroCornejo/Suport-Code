@@ -87,9 +87,9 @@ class NeuralNetwork(object):
         delta2 = np.dot(delta3, np.transpose(self.w2))*self.SigmoidDerivative((self.z2))
         self.dJ_dw1 = np.dot(np.transpose(x), delta2)
     
-    def UpdateWeightsSteepestDescent(self, steepest_descent_factor):
-        self.w1 -= self.dJ_dw1 * steepest_descent_factor
-        self.w2 -= self.dJ_dw2 * steepest_descent_factor
+    def UpdateWeightsGradientDescent(self, gradient_descent_factor):
+        self.w1 -= self.dJ_dw1 * gradient_descent_factor
+        self.w2 -= self.dJ_dw2 * gradient_descent_factor
 
 
 # We define the raw data: y=x**2
@@ -120,7 +120,7 @@ echo_level = 0
 Numerical alg parameters
 '''
 # perturbation            = 1.0e-9  # for computing the grandients
-steepest_descent_factor = 1.0e-5 # For updating the weights
+gradient_descent_factor = 1.0e-5 # For updating the weights
 
 '''
 Convergence parameters
@@ -144,7 +144,7 @@ while relative_error > tolerance and iteration < max_iter:
     neural_network.Compute_dJdw_analytical(x, y)
 
     # now we update the weights ==> Learning...
-    neural_network.UpdateWeightsSteepestDescent(steepest_descent_factor)
+    neural_network.UpdateWeightsGradientDescent(gradient_descent_factor)
 
     # new estimation
     y_hat = neural_network.Forward(x)
