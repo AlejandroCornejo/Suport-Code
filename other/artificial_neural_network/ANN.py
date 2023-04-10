@@ -99,16 +99,21 @@ pl.plot(x, y_hat, color="k", linewidth=5, label = "Initial guess")
 current_accumulated_error = neural_network.AccumulatedError_J(y, y_hat)
 
 '''
+General parameters
+'''
+echo_level = 0
+
+'''
 Numerical alg parameters
 '''
-perturbation            = 1.0e-6  # for computing the grandients
-steepest_descent_factor = 1.0e-5 # For updating the weights
+perturbation            = 1.0e-9  # for computing the grandients
+steepest_descent_factor = 1.0e-4 # For updating the weights
 
 '''
 Convergence parameters
 '''
-tolerance = 1.0e-7
-max_iter  = 50000
+tolerance = 1.0e-8
+max_iter  = 5000e3
 
 # we initialize some values
 iteration = 0
@@ -116,7 +121,7 @@ old_accumulated_error = 1.0
 relative_error = 1.0
 
 # interval of print info stream and plot
-interval_iter_print = 500 # iterations
+interval_iter_print = 2000 # iterations
 print_counter = 0
 
 while relative_error > tolerance and iteration < max_iter:
@@ -127,7 +132,9 @@ while relative_error > tolerance and iteration < max_iter:
     # now we update the weights ==> Learning...
     neural_network.UpdateWeightsSteepestDescent(steepest_descent_factor)
 
+    # new estimation
     y_hat = neural_network.Forward(x)
+
     current_accumulated_error = neural_network.AccumulatedError_J(y, y_hat)
     relative_error = np.abs((old_accumulated_error - current_accumulated_error) / current_accumulated_error)
     old_accumulated_error = current_accumulated_error
@@ -140,6 +147,11 @@ while relative_error > tolerance and iteration < max_iter:
         print_counter = 0
         pl.plot(x, y_hat, color="r")
 
+if iteration == max_iter:
+    print("The algorithm did not converge in the max iterations, rel error achieved: ", "{0:.4e}".format(relative_error).rjust(11))
+
+if echo_level > 0:
+    neural_network.PrintWeights()
 
 pl.xlabel('x', fontsize = 12)
 pl.ylabel('y', fontsize = 12)
