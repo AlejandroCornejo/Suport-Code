@@ -14,7 +14,7 @@ class NeuralNetwork(object):
         # We define Hyperparameters
         self.input_layer_size  = 1  # one dimensional input
         self.output_layer_size = 1  # one dimensional output
-        self.hidden_layer_size = 200  # number of hidden neurons
+        self.hidden_layer_size = 25  # number of hidden neurons
 
         # Weights matrices wij^(1) and wij^(2)
         self.w1 = np.random.randn(self.input_layer_size,  self.hidden_layer_size)  # 1x4
@@ -53,11 +53,35 @@ class NeuralNetwork(object):
             for j in range(cols):
                 accumulated_error += error_y[i,j]**2
         return 0.5*accumulated_error
+    
+    def Compute_dJdw_finite_differences(self, perturbation, current_accumulated_error):
+        rows, cols = self.w1.shape
+        for i in range(rows):
+            for j in range(cols):
+                self.w1[i,j]         += perturbation
+                y_hat_perturbed       = self.Forward(x)
+                perturbed_accum_error = self.AccumulatedError_J(y, y_hat_perturbed)
+                self.w1[i,j]         -= perturbation
+                self.dJ_dw1[i,j]      = (perturbed_accum_error - current_accumulated_error) / perturbation
+
+        # compute gradients of the wij^(2)
+        rows, cols = neural_network.w2.shape
+        for i in range(rows):
+            for j in range(cols):
+                self.w2[i,j]         += perturbation
+                y_hat_perturbed       = self.Forward(x)
+                perturbed_accum_error = self.AccumulatedError_J(y, y_hat_perturbed)
+                self.w2[i,j]         -= perturbation
+                self.dJ_dw2[i,j]      = (perturbed_accum_error - current_accumulated_error) / perturbation
+    
+    def UpdateWeightsSteepestDescent(self, steepest_descent_factor):
+        self.w1 -= self.dJ_dw1 * steepest_descent_factor
+        self.w2 -= self.dJ_dw2 * steepest_descent_factor
 
 
-# We define the raw data
+# We define the raw data: y=x**2
 x = np.transpose(np.array(([np.linspace(-10,10,50)]), dtype=float)) # needs to be an array with 2 dimensions
-y = x**2
+y = x # x**2
 
 # We scale the data...
 x_max = x.max()
@@ -74,47 +98,34 @@ pl.plot(x, y_hat, color="k", linewidth=5, label = "Initial guess")
 
 current_accumulated_error = neural_network.AccumulatedError_J(y, y_hat)
 
-# now we start training...
-perturbation  = 1.0e-8  # for computing the grandients
+'''
+Numerical alg parameters
+'''
+perturbation            = 1.0e-6  # for computing the grandients
+steepest_descent_factor = 1.0e-5 # For updating the weights
 
-steepest_descent_factor = 1e-5 # For updating the weights
+'''
+Convergence parameters
+'''
+tolerance = 1.0e-7
+max_iter  = 50000
 
-# Convergence parameters
-tolerance = 1.0e-6
+# we initialize some values
 iteration = 0
-max_iter = 5000
 old_accumulated_error = 1.0
 relative_error = 1.0
 
 # interval of print info stream and plot
-interval_iter_print = 10 # iterations
+interval_iter_print = 500 # iterations
 print_counter = 0
 
 while relative_error > tolerance and iteration < max_iter:
     iteration += 1
     # compute gradients of the wij^(1)
-    rows, cols = neural_network.w1.shape
-    for i in range(rows):
-        for j in range(cols):
-            neural_network.w1[i,j]    += perturbation
-            y_hat_perturbed            = neural_network.Forward(x)
-            perturbed_accum_error      = neural_network.AccumulatedError_J(y, y_hat_perturbed)
-            neural_network.w1[i,j]    -= perturbation
-            neural_network.dJ_dw1[i,j] = (perturbed_accum_error - current_accumulated_error) / perturbation
-
-    # compute gradients of the wij^(2)
-    rows, cols = neural_network.w2.shape
-    for i in range(rows):
-        for j in range(cols):
-            neural_network.w2[i,j]    += perturbation
-            y_hat_perturbed            = neural_network.Forward(x)
-            perturbed_accum_error      = neural_network.AccumulatedError_J(y, y_hat_perturbed)
-            neural_network.w2[i,j]    -= perturbation
-            neural_network.dJ_dw2[i,j] = (perturbed_accum_error - current_accumulated_error) / perturbation
+    neural_network.Compute_dJdw_finite_differences(perturbation, current_accumulated_error)
 
     # now we update the weights ==> Learning...
-    neural_network.w1 -= neural_network.dJ_dw1 * steepest_descent_factor
-    neural_network.w2 -= neural_network.dJ_dw2 * steepest_descent_factor
+    neural_network.UpdateWeightsSteepestDescent(steepest_descent_factor)
 
     y_hat = neural_network.Forward(x)
     current_accumulated_error = neural_network.AccumulatedError_J(y, y_hat)
@@ -124,8 +135,8 @@ while relative_error > tolerance and iteration < max_iter:
     print_counter += 1
     if print_counter > interval_iter_print:
         print(" ## Iteration: ", iteration)
-        print("    The current relative_error is:    ", "{0:.4e}".format(relative_error).rjust(11))
-        print("    The current_accumulated_error is: ", "{0:.4e}".format(current_accumulated_error).rjust(11), "\n")
+        print("    The current relative_error is:    ", "{0:.4e}".format(relative_error).rjust(11), "\n")
+        # print("    The current_accumulated_error is: ", "{0:.4e}".format(current_accumulated_error).rjust(11), "\n")
         print_counter = 0
         pl.plot(x, y_hat, color="r")
 
