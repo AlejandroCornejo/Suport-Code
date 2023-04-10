@@ -36,13 +36,15 @@ class NeuralNetwork(object):
 
     def Sigmoid(self, z):
         return 1.0 / (1.0 + np.exp(-z))
+    def SigmoidDerivative(self, z):
+        return np.exp(-z) / ((1.0 + np.exp(-z))**2)
 
     def Forward(self, x):
-        z2 = np.dot(x, self.w1)   # Activity:   number_of_examples x number_of_hidden_layers
-        a2 = self.Sigmoid(z2)     # Activation: number_of_examples x number_of_hidden_layers
-        z3 = np.dot(a2, self.w2)  # Activity: 
-        y_hat = self.Sigmoid(z3)  # prediction
-        return y_hat
+        self.z2 = np.dot(x, self.w1)        # Activity:   number_of_examples x number_of_hidden_layers
+        self.a2 = self.Sigmoid(self.z2)     # Activation: number_of_examples x number_of_hidden_layers
+        self.z3 = np.dot(self.a2, self.w2)  # Activity: 
+        self.y_hat = self.Sigmoid(self.z3)  # prediction
+        return self.y_hat
 
     def AccumulatedError_J(self, y, y_hat):
         # let's print the accumulated error ==>  AccumErr = Sum(0.5*(y-yhat)^2)
@@ -73,6 +75,17 @@ class NeuralNetwork(object):
                 perturbed_accum_error = self.AccumulatedError_J(y, y_hat_perturbed)
                 self.w2[i,j]         -= perturbation
                 self.dJ_dw2[i,j]      = (perturbed_accum_error - current_accumulated_error) / perturbation
+
+
+    def Compute_dJdw_analytical(self, x, y):
+        # compute dJ/dw2
+        y_hat = self.Forward(x)
+        delta3 = np.multiply(-(y-y_hat), self.SigmoidDerivative((self.z3)))
+        self.dJ_dw2 = np.dot(np.transpose(self.a2), delta3)
+
+        # compute dJ/dw1
+        delta2 = np.dot(delta3, np.transpose(self.w2))*self.SigmoidDerivative((self.z2))
+        self.dJ_dw1 = np.dot(np.transpose(x), delta2)
     
     def UpdateWeightsSteepestDescent(self, steepest_descent_factor):
         self.w1 -= self.dJ_dw1 * steepest_descent_factor
@@ -106,14 +119,14 @@ echo_level = 0
 '''
 Numerical alg parameters
 '''
-perturbation            = 1.0e-9  # for computing the grandients
-steepest_descent_factor = 1.0e-4 # For updating the weights
+# perturbation            = 1.0e-9  # for computing the grandients
+steepest_descent_factor = 1.0e-5 # For updating the weights
 
 '''
 Convergence parameters
 '''
-tolerance = 1.0e-8
-max_iter  = 5000e3
+tolerance = 1.0e-10
+max_iter  = 1e9
 
 # we initialize some values
 iteration = 0
@@ -121,13 +134,14 @@ old_accumulated_error = 1.0
 relative_error = 1.0
 
 # interval of print info stream and plot
-interval_iter_print = 2000 # iterations
+interval_iter_print = 5000 # iterations
 print_counter = 0
 
 while relative_error > tolerance and iteration < max_iter:
     iteration += 1
     # compute gradients of the wij^(1)
-    neural_network.Compute_dJdw_finite_differences(perturbation, current_accumulated_error)
+    # neural_network.Compute_dJdw_finite_differences(perturbation, current_accumulated_error)
+    neural_network.Compute_dJdw_analytical(x, y)
 
     # now we update the weights ==> Learning...
     neural_network.UpdateWeightsSteepestDescent(steepest_descent_factor)
