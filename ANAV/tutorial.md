@@ -1,6 +1,8 @@
 
 -- Prestressed concrete in Kratos --
 
+Use GiD 15.
+
 1. Create geometry in GiD, volumes of concrete and lines for steel tendons.
 	Obs: * Volumes must be in one layer and lines in another one.
 	     * We identify each Tendon by creating a Group in GiD named Tendon_Whateveryouwant
