@@ -14,7 +14,7 @@ class NeuralNetwork(object):
         # We define Hyperparameters
         self.input_layer_size  = 1  # one dimensional input
         self.output_layer_size = 1  # one dimensional output
-        self.hidden_layer_size = 25  # number of hidden neurons
+        self.hidden_layer_size = 5  # number of hidden neurons
 
         # Weights matrices wij^(1) and wij^(2)
         self.w1 = np.random.randn(self.input_layer_size,  self.hidden_layer_size)  # 1x4
@@ -49,12 +49,7 @@ class NeuralNetwork(object):
     def AccumulatedError_J(self, y, y_hat):
         # let's print the accumulated error ==>  AccumErr = Sum(0.5*(y-yhat)^2)
         error_y = y - y_hat
-        accumulated_error = 0.0
-        rows, cols = error_y.shape
-        for i in range(rows):
-            for j in range(cols):
-                accumulated_error += error_y[i,j]**2
-        return 0.5*accumulated_error
+        return 0.5*(np.linalg.norm(error_y)**2)
     
     def Compute_dJdw_finite_differences(self, perturbation, current_accumulated_error):
         rows, cols = self.w1.shape
@@ -120,24 +115,23 @@ echo_level = 0
 Numerical alg parameters
 '''
 # perturbation            = 1.0e-9  # for computing the grandients
-gradient_descent_factor = 1.0e-5 # For updating the weights
+gradient_descent_factor = 1.0 # For updating the weights
 
 '''
 Convergence parameters
 '''
-tolerance = 1.0e-10
+tolerance = 1.0e-2
 max_iter  = 1e9
 
 # we initialize some values
 iteration = 0
-old_accumulated_error = 1.0
-relative_error = 1.0
 
 # interval of print info stream and plot
 interval_iter_print = 5000 # iterations
 print_counter = 0
+is_converged = False
 
-while relative_error > tolerance and iteration < max_iter:
+while not is_converged and iteration < max_iter:
     iteration += 1
     # compute gradients of the wij^(1)
     # neural_network.Compute_dJdw_finite_differences(perturbation, current_accumulated_error)
@@ -150,25 +144,29 @@ while relative_error > tolerance and iteration < max_iter:
     y_hat = neural_network.Forward(x)
 
     current_accumulated_error = neural_network.AccumulatedError_J(y, y_hat)
-    relative_error = np.abs((old_accumulated_error - current_accumulated_error) / current_accumulated_error)
-    old_accumulated_error = current_accumulated_error
+
+    norm_derivatives = np.linalg.norm(neural_network.dJ_dw1) + np.linalg.norm(neural_network.dJ_dw2)
+    is_converged = (norm_derivatives) <= tolerance
 
     print_counter += 1
     if print_counter > interval_iter_print:
         print(" ## Iteration: ", iteration)
-        print("    The current relative_error is:    ", "{0:.4e}".format(relative_error).rjust(11), "\n")
-        # print("    The current_accumulated_error is: ", "{0:.4e}".format(current_accumulated_error).rjust(11), "\n")
+        print("    The current norm_derivatives is:          ", "{0:.4e}".format(norm_derivatives).rjust(11))
+        print("    The current current_accumulated_error is: ", "{0:.4e}".format(current_accumulated_error).rjust(11), "\n")
         print_counter = 0
         pl.plot(x, y_hat, color="r")
 
 if iteration == max_iter:
-    print("The algorithm did not converge in the max iterations, rel error achieved: ", "{0:.4e}".format(relative_error).rjust(11))
+    print("The algorithm did not converge in the max iterations, norm_derivatives achieved: ", "{0:.4e}".format(norm_derivatives).rjust(11))
+else:
+    print("The algorithm converged in ", str(iteration) ," iterations, norm_derivatives achieved: ", "{0:.4e}".format(norm_derivatives).rjust(11))
 
 if echo_level > 0:
     neural_network.PrintWeights()
+    neural_network.PrintGradients()
 
-pl.xlabel('x', fontsize = 12)
-pl.ylabel('y', fontsize = 12)
+pl.xlabel('x', fontsize = 15)
+pl.ylabel('y', fontsize = 15)
 pl.plot(x, y_hat, color="g", linewidth=5, label="Final result")
 pl.legend(fontsize = 13)
 pl.grid()
