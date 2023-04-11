@@ -1,30 +1,47 @@
 
 -- Prestressed concrete in Kratos --
 
-Use GiD 15.
+- Use GiD 15.
+- Copy the Asco_PT02.gid and Kratos.gid problemtypes inside InstallationFolder/GiD/problemtypes
 
 1. Create geometry in GiD, volumes of concrete and lines for steel tendons.
 	Obs: * Volumes must be in one layer and lines in another one.
 	     * We identify each Tendon by creating a Group in GiD named Tendon_Whateveryouwant
-2. Calculate intersections of lines with hexas by means of the Asco_PT02.gid problemtype. It generats a .intersections file
+
+
+2. Calculate intersections of lines with hexas by means of the Asco_PT02.gid problemtype. It generates a .intersections file
+    * Upload the Asco_PT02 GiD plugin: Data->Problemtype->Asco_PT02
+    * lock the layer of the tendons.
+	* Mesh the volumes with hexas: (Mesh->Element Type->Hexaedra) and (Mesh->Structured->Volumes->Assign number of divisions) and (Mesh->Generate Mesh)
+	* Unlock tendon layer and lock concrete layer
+	* Execute in the GiD command window below:    Mescape Utilities Variables MaintainOldMesh 1 escape
+	* Mesh->Generate Mesh, do not remove previous mesh when GiD asks to do it
+	* Data->Calculate Intersections (generates the .intersections file)
+
+
 3. At the beginning of each tendon intersection block we add:       D = 1.121e-2    Ep = 6.858e-3
-    which defines the diameter of the tendon and its imposed strain.
+    which defines the diameter of the tendon and its imposed prestressing strain.
 	Example:
 	    Begin Tendon - Hexahedra intersection: Tendon_H1      D = 1.121e-2    Ep = 6.858e-3
 	       227	        0.24066	    -4998.91279	        0.05066		        0.24066	    -4998.81395	        0.05066
 	       228	        0.24066	    -4998.81395	        0.05066		        0.24066	    -4998.71512	        0.05066
 		   ...
 		End Tendon - Hexahedra intersection
-4. We define the material props of concrete, boundary conditions, loads, etc with the Kratos problemtype for GiD.
+
+
+4. We define the material props of concrete, boundary conditions, loads, etc with the Kratos problemtype for GiD. 
+    We load it with: Data->problemtype->Kratos, Then select Structural/3D
     * This will generate several files:
 	        - .mdpa: defines the coordinates of nodes, connectivities of elements, submodelparts...
 			- ProjectParameters.json: defines problem general parameters: time step, load values, imposed displacement values, printing...
 			- StructuralMaterials.json: defines the name of the constitutive laws to be used and its material properties.
 			- MainKratos.py: the main file to be run --> python MainKratos.py
+
+
 5. Now we add the custom prestressing info in the standard Kratos files:
     * Create a new submodel part in the .mdpa file that includes all the elements intersected for each tendon (we can create one submodel per tendon or one submodel for several tendons)
 	    Example:
-				Begin SubModelPart Tendon_H1
+				Begin SubModelPart tendon
 				  Begin SubModelPartTables
 				  End SubModelPartTables
 				  Begin SubModelPartNodes
@@ -41,7 +58,7 @@ Use GiD 15.
 				  Begin SubModelPartConditions
 				  End SubModelPartConditions
 				End SubModelPart
-	
+
 	* Include a block in the ProjectParameters.json in the "list_of_other_processes" to compute the % participation and orientation of the steel tendons.
 	Example:
 	    {
@@ -58,7 +75,7 @@ Use GiD 15.
 	* Add a new material property in the StructuralMaterials.json that defines the behaviour of the composite prestressed concrete. We must use the Serial-Parallel Rule of Mixtures.
 	Example:
 		{
-			"model_part_name" : "Structure.tendon_H", // ok
+			"model_part_name" : "Structure.tendon",
 			"properties_id"   : 8,
 			"Material"        : {
 				"constitutive_law" : {
@@ -99,3 +116,9 @@ Use GiD 15.
 				}
 			}]
 		}
+
+
+
+Q&A
+
+* How to plot force displacement curves?
