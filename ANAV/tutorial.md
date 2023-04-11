@@ -31,7 +31,7 @@
 
 4. We define the material props of concrete, boundary conditions, loads, etc with the Kratos problemtype for GiD. 
     We load it with: Data->problemtype->Kratos, Then select Structural/3D
-    * This will generate several files:
+    * This will generate several files (Kratos->Generate files):
 	        - .mdpa: defines the coordinates of nodes, connectivities of elements, submodelparts...
 			- ProjectParameters.json: defines problem general parameters: time step, load values, imposed displacement values, printing...
 			- StructuralMaterials.json: defines the name of the constitutive laws to be used and its material properties.
