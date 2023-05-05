@@ -32,12 +32,13 @@ def ComputeAParameterExponential(Threshold, Gf, L, Young):
 E = 2.1e9      # Pa
 l_char = 0.1   # m
 fy = 500e6     # Pa
-Gf = 15000000      # J/m2
-softening = "Linear"
+Gf = 10000000      # J/m2
+softening = "Exponential" # "Linear"
 
 initial_strain = 0.0
 final_strain   = fy/E*3.0
 
+# do not touch...
 strain = numpy.linspace(initial_strain, final_strain, 100)
 effective_stress = E*strain
 
