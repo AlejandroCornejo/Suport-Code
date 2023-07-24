@@ -29,10 +29,10 @@ def ComputeAParameterExponential(Threshold, Gf, L, Young):
     return 1.0 / (Gf * Young / (L * Threshold**2) - 0.5)
 
 # Parameters
-E = 6.88e10      # Pa
+E = 2.575e9      # Pa
 l_char = 0.002   # m
-fy = 1.61863e9     # Pa
-Gf = 1e5      # J/m2
+fy = 3.4E+07     # Pa
+Gf = 1e4      # J/m2
 softening = "Exponential" # "Linear"
 
 initial_strain = 0.0
