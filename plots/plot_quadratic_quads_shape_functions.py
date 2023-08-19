@@ -13,7 +13,7 @@ from mpl_toolkits.mplot3d import Axes3D
  '''
  
 #################
-shape_function_node = 0
+shape_function_node = 5
 #################
 
 # We define the shape functions
@@ -32,7 +32,11 @@ def N(xi, eta, node):
         return fx2*fy2
     elif node == 3:
         return fx1*fy2
-    # ...
+    elif node == 8:
+        return fx3*fy3
+    elif node == 5:
+        return fx2*fy3
+    # ... there are more
 
 # Generate x and y values
 x = np.linspace(-1, 1, 100)
