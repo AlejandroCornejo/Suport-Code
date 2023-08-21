@@ -16,7 +16,7 @@ from mpl_toolkits.mplot3d import Axes3D
  '''
  
 #################
-shape_function_node = 4
+shape_function_node = 3
 #################
 
 # We define the shape functions
@@ -49,10 +49,11 @@ surf = ax.plot_surface(X, Y, Z, cmap='viridis')
 ax.set_xlabel('xi')
 ax.set_ylabel('eta')
 ax.set_zlabel('N(xi.eta)')
-ax.set_title('Shape function')
+ax.set_title('Shape function of node ' + str(shape_function_node), fontsize=16)
 
 # Add colorbar
-fig.colorbar(surf, ax=ax)
+
+fig.colorbar(surf, ax=ax, ticks=np.linspace(0.1, 1.1, 11))
 
 # Show the plot
 plt.show()
