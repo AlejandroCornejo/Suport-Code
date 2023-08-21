@@ -1,0 +1,27 @@
+Nodes, Elements, Materials                              0                
+8	1	1                                               1
+Materials                                               2
+1	35000e6	0.22                                        2+numMat
+List Of Elements (Id, Material, Node1,...,Node8)        3+nummat
+1	1	4	1	3	6	5	2	7	8                   3+nummat+numelem
+Nodes                                                   4+nummat+numelem
+1	0.0000000000	1.0000000000	1.0000000000
+2	0.0000000000	0.0000000000	1.0000000000
+3	0.0000000000	1.0000000000	0.0000000000
+4	1.0000000000	1.0000000000	1.0000000000
+5	1.0000000000	0.0000000000	1.0000000000
+6	1.0000000000	1.0000000000	0.0000000000
+7	0.0000000000	0.0000000000	0.0000000000
+8	1.0000000000	0.0000000000	0.0000000000       4+nummat+numelem+numnodes
+Nodes with Boundary Condition                          5+nummat+numelem+numnodes
+4                                                      6+nummat+numelem+numnodes
+1	1	1	1	0.0	0.0	0.0                            7+nummat+numelem+numnodes
+2	1	1	1	0.0	0.0	0.0
+3	1	1	1	0.0	0.0	0.0
+7	1	1	1	0.0	0.0	0.0
+Nodal Force                                         7+nummat+numelem+numnodes
+4                                                   8+nummat+numelem+numnodes+NumFixedNodes
+4	1	0	0	100000.0	0.0	0.0
+5	1	0	0	100000.0	0.0	0.0
+6	1	0	0	100000.0	0.0	0.0
+8	1	0	0	100000.0	0.0	0.0
