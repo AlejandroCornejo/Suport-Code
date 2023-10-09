@@ -41,11 +41,7 @@ class DamageCL():
         self.Initial_threshold = fy
         self.damage = 0.0
         # print("Damage CL created...")
-    
-    def SetYoung(self, E):
-        self.E = E
-    def SetG(self, G):
-        self.G = G
+
 
     def CalculateStress(self, strain):
         effective_stress = self.E * strain
@@ -91,27 +87,43 @@ cl = DamageCL(E, G, fy, l_char)
 
 stress_list = []
 predicted_g = 0.0
+G_history = []
+damage_history = []
 
 count = 0
 # Strain increment process.......
 for count, strain in enumerate(strain_history):
     # Here the cl computes stresses at each step
     if count == 200:
-        # cl.E *= 0.5
+        cl.E *= 0.5
+        """
+        When modifying the E, we should maintain A parameters to be smooth
+        """
+        cl.G *= 0.5 # the A parameters must be constant??
         # cl.Initial_threshold *= 0.5
         pass
     stress_list.append(cl.CalculateStress(strain))
     strain_increment = abs(strain_history[count] - strain_history[count-1])
     if stress_list[count] >= 0.0:
         predicted_g += strain_increment*abs(stress_list[count])
+        G_history.append(predicted_g*l_char)
+        damage_history.append(cl.damage)
 # End loading process
 
+print("\n    The simulated G is: ", str(predicted_g*l_char), " J/m2.")
 print("\n    The simulated G has a % relative error of: ", str((predicted_g*l_char-G)/100.0), "%.")
-plt.xlabel('Strain [-]', fontsize = 12)
-plt.ylabel('Stress [Pa]', fontsize = 12)
-plt.style.use(['science', 'high-vis'])
-plt.plot(strain_history, stress_list, "k-", label = "Response", linewidth=2)
-plt.grid()
-plt.show()
 
+fig, ax = plt.subplots(2, 2)
+plt.style.use(['science', 'high-vis'])
+ax[0, 0].plot(strain_history, stress_list, 'b')
+ax[0, 0].set_xlabel("Strain [-]")
+ax[0, 0].set_ylabel("Stress [Pa]")
+
+ax[0, 1].plot(strain_history, G_history, 'r')
+ax[0, 1].set_xlabel("Strain [-]")
+ax[0, 1].set_ylabel("Dissipated energy [J/m2]")
+
+ax[1, 0].plot(strain_history, damage_history, 'g')
+ax[1, 0].set_xlabel("Strain [-]")
+ax[1, 0].set_ylabel("Damage [-]")
 plt.show()
