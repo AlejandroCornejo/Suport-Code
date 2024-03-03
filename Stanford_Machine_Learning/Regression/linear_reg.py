@@ -47,10 +47,10 @@ print("*******************************")
 print("The initial error J is: ", J)
 print("The initial dJ_dT is  : ", dJ_dT)
 
-tolerance = 1.0e-5
+tolerance = 1.0e-8
 learning_rate = 0.01
 iter = 0
-max_iter = 200
+max_iter = 2000
 Jold = 0.0
 
 while abs(J-Jold) > tolerance:
@@ -71,3 +71,5 @@ pl.plot(x, h(Theta1, Theta2, x), color="red", label="Linear regression")
 
 pl.legend()
 pl.show()
+
+# try now with stochastic gradient descent
