@@ -69,7 +69,39 @@ print("The linear equation is -->  y = ", '{:.2e}'.format(Theta1), " + ", '{:.2e
 
 pl.plot(x, h(Theta1, Theta2, x), color="red", label="Linear regression")
 
+#-----------------------------------------
+# try now with stochastic gradient descent
+#-----------------------------------------
+StoTheta1 = 0.0
+StoTheta2 = 0.0
+iter = 0
+max_iter = 2500
+Jold = 0.0
+J    = Calculate_J_error(StoTheta1, StoTheta2, x, y)
+learning_rate = 0.01
+tolerance = 1.0e-6
+
+print("*******************************")
+print("The initial Stochastic error J is: ", J)
+
+while abs(J-Jold) > tolerance:
+    for i in range(x.size): # we update the parameters only according to the derivative of ONE sample at each time (no sumation)
+        factor     = h(StoTheta1, StoTheta2, x[i]) - y[i]
+        StoTheta1 -= learning_rate * factor * 1.0
+        StoTheta2 -= learning_rate * factor * x[i]
+        Jold      = J
+        J         = Calculate_J_error(StoTheta1, StoTheta2, x, y)
+
+        print("Stochastic Iteration: ", iter, "Error |J-Jold|: ", '{:.2e}'.format(abs(J-Jold)))
+        iter += 1
+        if iter >= max_iter:
+            break
+    if iter >= max_iter:
+        break
+print("*******************************")
+print("The linear equation is -->  y = ", '{:.2e}'.format(StoTheta1), " + ", '{:.2e}'.format(StoTheta2), " * x")
+
+pl.plot(x, h(StoTheta1, StoTheta2, x), color="g", label="Stochastic Linear regression")
+
 pl.legend()
 pl.show()
-
-# try now with stochastic gradient descent
