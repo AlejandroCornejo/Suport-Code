@@ -51,20 +51,20 @@ element = TimoshenkoElement2D2N(node_1, node_2, E, I, nu, A)
 
 
 
-u_e_test = np.zeros(4)
-u_e_test[0] = 0.0  # v1
-u_e_test[1] = 1.0  # rot1
-u_e_test[2] = 0.0  # v2
-u_e_test[3] = 1.0  # rot3
+# u_e_test = np.zeros(4)
+# u_e_test[0] = 0.0  # v1
+# u_e_test[1] = 1.0  # rot1
+# u_e_test[2] = 0.0  # v2
+# u_e_test[3] = 1.0  # rot3
 
 # element.PrintShapeFunctions()
 
-element.PrintDeflectionCurveFromNodalValues(u_e_test)
+# element.PrintDeflectionCurveFromNodalValues(u_e_test)
 # element.PrintRotationCurveFromNodalValues(u_e_test)
-element.PrintStrainKinematics(u_e_test)
+# element.PrintStrainKinematics(u_e_test)
 # element.Phi = 0.0
 
-K_integrated = element.CalculateStiffnessMatrix(3)
+K_integrated = element.CalculateStiffnessMatrix(2)
 
 ############################################################
 # NUMERICAL EXAMPLES

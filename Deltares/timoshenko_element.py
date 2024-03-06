@@ -30,14 +30,14 @@ class TimoshenkoElement2D2N():
         self.Length = math.sqrt((node_1.x - node_2.x)**2 + (node_1.y - node_2.y)**2)
         self.G = E / (2.0 * (1.0 + nu))
         self.Phi = 12.0 * E * I / (self.G * self.As * self.Length**2)
-        self.IntegrationOrder = 1
+        self.IntegrationOrder = 3
         self.J = self.Length * 0.5
 
     # ------------------------------------------------------------------------------------------------
     def GetIntegrationPoints(self, IntegrationOrder = 3):
         if IntegrationOrder == 1:
             return np.matrix([0, 2.0]) # Coord, weight
-        elif IntegrationOrder == 2:
+        elif IntegrationOrder == 2: # enough to integrate exact
             return np.matrix([[-1.0/math.sqrt(3.0), 1.0],
                                [1.0/math.sqrt(3.0), 1.0]])
         elif IntegrationOrder == 3:
