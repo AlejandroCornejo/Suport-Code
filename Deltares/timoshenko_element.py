@@ -31,7 +31,7 @@ class TimoshenkoElement2D2N():
         self.G = E / (2.0 * (1.0 + nu))
         self.Phi = 12.0 * E * I / (self.G * self.As * self.Length**2)
         self.IntegrationOrder = 1
-        self.J = self.Length * 0.5 # NOTE to check
+        self.J = self.Length * 0.5
 
     # ------------------------------------------------------------------------------------------------
     def GetIntegrationPoints(self, IntegrationOrder = 3):
@@ -100,6 +100,12 @@ class TimoshenkoElement2D2N():
     def GetCurvature(self, xi, U_e): # kappa = N_theta_derivative * U_e
         N_theta_derivatives = self.GetN_theta_derivatives(xi)
         return np.dot(N_theta_derivatives, U_e)
+
+    # ------------------------------------------------------------------------------------------------
+    def GetShearStrain(self, xi, U_e): # kappa = N_theta_derivative * U_e
+        N_theta = self.GetN_theta(xi)
+        N_derivatives = self.GetFirstDerivativesShapeFunctionsValues(xi)
+        return np.dot(N_derivatives - N_theta, U_e)
     # ------------------------------------------------------------------------------------------------
     def GetN_theta(self, xi): # theta = N_theta * U_e
         # These shape functions are used to interpolate the total rotation Theta
@@ -111,7 +117,7 @@ class TimoshenkoElement2D2N():
     # ------------------------------------------------------------------------------------------------
     def GetN_theta_derivatives(self, xi):
         one_plus_phi = 1.0 + self.Phi
-        return 2.0 / self.Length * np.array([3.0 * xi / (one_plus_phi * self.Length), 
+        return (2.0 / self.Length) * np.array([3.0 * xi / (one_plus_phi * self.Length), 
                          (-0.5 * self.Phi + 1.5 * xi - 0.5) / (self.Phi + 1.0),
                          (-3.0 * xi) / (self.Length * self.Phi + self.Length),
                          (0.5*self.Phi + 1.5 * xi + 0.5) / (self.Phi + 1.0)])
@@ -125,7 +131,6 @@ class TimoshenkoElement2D2N():
     # ------------------------------------------------------------------------------------------------
 
     def CalculateStiffnessMatrix(self, IntegrationOrder = 3):
-
         K = np.zeros((6, 6))
 
         integration_point_w = self.GetIntegrationPoints(IntegrationOrder)
@@ -160,15 +165,17 @@ class TimoshenkoElement2D2N():
             global_size_N[5] = N_derivatives[3] - N_theta[3]
             K += np.outer(global_size_N, global_size_N) * self.G * self.As * w_ip * self.J
         return K
+    # ------------------------------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-
+    def ApplyBoundaryConditionsToK(self, K, FixedDoFArray):
+        # We put all null except the diagonal (block builder)
+        size = np.shape(K)[0]
+        K_bc = np.copy(K)
+        for dof in FixedDoFArray:
+            K_bc[dof, :]   = np.zeros(size)
+            K_bc[:, dof]   = np.zeros(size)
+            K_bc[dof, dof] = 1.0
+        return K_bc
 
     # PRINT METHODS #
     def PrintStrainKinematics(self, U_e):
@@ -178,10 +185,10 @@ class TimoshenkoElement2D2N():
         counter = 0
         for x in xi:
             kappa[counter] = self.GetCurvature(x, U_e)
-            # gamma[counter] = self.GetShearStrain(x, U_e)
+            gamma[counter] = self.GetShearStrain(x, U_e)
             counter += 1
         pl.plot(xi, kappa, label="Curvature")
-        # pl.plot(xi, gamma, label="Shear Strain")
+        pl.plot(xi, gamma, label="Shear Strain")
         pl.grid()
         pl.legend()
         pl.show()
