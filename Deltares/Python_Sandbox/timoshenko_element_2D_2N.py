@@ -11,27 +11,26 @@ In this file we derive the main equations of 2-noded Timoshenko FE, firstly usin
 
 """
 
-class Node():
-    def __init__(self, x, y = 0.0):
-        self.x = x
-        self.y = y
-        self.v        = 0.0 # Vertical deflection
-        self.rotation = 0.0 # Actual rotation Theta
-
 class TimoshenkoElement2D2N():
     # ------------------------------------------------------------------------------------------------
-    def __init__(self, node_1, node_2, E, I, nu, A):
-        self.Nodes = [node_1, node_2]
+    def __init__(self, Node1, Node2, E, I, nu, A):
+        self.Nodes = [Node1, Node2]
         self.E = E
         self.A = A
         self.As = A * 5.0 / 6.0 # NOTE depends on the cross section
         self.I = I
         self.nu = nu
-        self.Length = math.sqrt((node_1.x - node_2.x)**2 + (node_1.y - node_2.y)**2)
+        self.Length = math.sqrt((Node1.x - Node2.x)**2 + (Node1.y - Node2.y)**2)
         self.G = E / (2.0 * (1.0 + nu))
         self.Phi = 12.0 * E * I / (self.G * self.As * self.Length**2)
-        self.IntegrationOrder = 3
+        self.IntegrationOrder = 2
         self.J = self.Length * 0.5
+    # ------------------------------------------------------------------------------------------------
+    def GetDoFList(self):
+        dofs = np.zeros(4)
+        dofs[0], dofs[1] = self.Nodes[0].GetDoFList()
+        dofs[2], dofs[3] = self.Nodes[1].GetDoFList()
+        return dofs
 
     # ------------------------------------------------------------------------------------------------
     def GetIntegrationPoints(self, IntegrationOrder = 3):
@@ -130,7 +129,7 @@ class TimoshenkoElement2D2N():
         return 2.0 / self.Length * np.array([-0.5, 0.5])
     # ------------------------------------------------------------------------------------------------
 
-    def CalculateStiffnessMatrix(self, IntegrationOrder = 3):
+    def CalculateStiffnessMatrix(self, IntegrationOrder = 2):
         K = np.zeros((6, 6))
 
         integration_point_w = self.GetIntegrationPoints(IntegrationOrder)
