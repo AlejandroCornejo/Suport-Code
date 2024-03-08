@@ -31,7 +31,15 @@ class TimoshenkoElement2D2N():
         dofs[0], dofs[1] = self.Nodes[0].GetDoFList()
         dofs[2], dofs[3] = self.Nodes[1].GetDoFList()
         return dofs
-
+    # ------------------------------------------------------------------------------------------------
+    def dN_dEl(self): # This method return the derivative of the axial force with respect to the axial strain El
+        return self.E * self.A
+    # ------------------------------------------------------------------------------------------------
+    def dM_dkappa(self): # This method return the derivative of the Moment with respect to the cuvature kappa
+        return self.E * self.I
+    # ------------------------------------------------------------------------------------------------
+    def dV_dgamma(self): # This method return the derivative of the shear V with respect to the shear strain gamma
+        return self.G * self.As
     # ------------------------------------------------------------------------------------------------
     def GetIntegrationPoints(self, IntegrationOrder = 3):
         if IntegrationOrder == 1:
@@ -143,7 +151,7 @@ class TimoshenkoElement2D2N():
             N_u_derivatives = self.GetN_u_Derivatives(x_ip)
             global_size_N[0] = N_u_derivatives[0]
             global_size_N[3] = N_u_derivatives[1]
-            K += np.outer(global_size_N, global_size_N) * self.E * self.A * w_ip * self.J # we add the Jacobian of the isoparametric space
+            K += np.outer(global_size_N, global_size_N) * self.dN_dEl() * w_ip * self.J # we add the Jacobian of the isoparametric space
 
             # The bending contributions...
             global_size_N = np.zeros(6)
@@ -152,7 +160,7 @@ class TimoshenkoElement2D2N():
             global_size_N[2] = N_theta_derivatives[1]
             global_size_N[4] = N_theta_derivatives[2]
             global_size_N[5] = N_theta_derivatives[3]
-            K += np.outer(global_size_N, global_size_N) * self.E * self.I * w_ip * self.J
+            K += np.outer(global_size_N, global_size_N) * self.dM_dkappa() * w_ip * self.J
 
             # The shear contributions...
             global_size_N = np.zeros(6)
@@ -162,8 +170,10 @@ class TimoshenkoElement2D2N():
             global_size_N[2] = N_derivatives[1] - N_theta[1]
             global_size_N[4] = N_derivatives[2] - N_theta[2]
             global_size_N[5] = N_derivatives[3] - N_theta[3]
-            K += np.outer(global_size_N, global_size_N) * self.G * self.As * w_ip * self.J
+            K += np.outer(global_size_N, global_size_N) * self.dV_dgamma() * w_ip * self.J
         return K
+    # ------------------------------------------------------------------------------------------------
+    def CalculateInternalForcesVector(self, IntegrationOrder = 2)
     # ------------------------------------------------------------------------------------------------
 
     def ApplyBoundaryConditionsToK(self, K, FixedDoFArray):
@@ -215,6 +225,7 @@ class TimoshenkoElement2D2N():
         pl.show()
     # ------------------------------------------------------------------------------------------------
     def PrintDeflectionCurveFromNodalValues(self, U_e): # U_e = {v1, rot1, v2, rot2}
+        x_c = 0.5*(self.Nodes[0].x + self.Nodes[1].x)
         xi = np.linspace(-1, 1, 500)
         deflection = np.zeros(xi.size)
         counter = 0
@@ -222,12 +233,13 @@ class TimoshenkoElement2D2N():
             shape_functions_values = self.GetShapeFunctionsValues(x)
             deflection[counter] = np.dot(shape_functions_values, U_e) # v = N·u
             counter += 1
-        pl.plot(xi, deflection, label="Deflection(xi)")
+        pl.plot(xi * self.Length / 2 + x_c, deflection, label="v(x)", linewidth=2) # transformed to X
         pl.grid()
         pl.legend()
         pl.show()
     # ------------------------------------------------------------------------------------------------
     def PrintRotationCurveFromNodalValues(self, U_e): # U_e = {v1, rot1, v2, rot2}
+        x_c = 0.5*(self.Nodes[0].x + self.Nodes[1].x)
         xi = np.linspace(-1, 1, 500)
         rotation = np.zeros(xi.size)
         counter = 0
@@ -236,8 +248,38 @@ class TimoshenkoElement2D2N():
             N_theta = self.GetN_theta(x)
             rotation[counter] = np.dot(N_theta, U_e)
             counter += 1
-        pl.plot(xi, rotation, label="Rotation(xi) / N_theta")
+        pl.plot(xi * self.Length / 2. + x_c, rotation, label="Rotation(x) / N_theta") # transformed to X
         pl.grid()
         pl.legend()
         pl.show()
     # ------------------------------------------------------------------------------------------------
+    def PrintBendingMomentsFromNodalValues(self, Ue):
+        x_c = 0.5*(self.Nodes[0].x + self.Nodes[1].x)
+        xi = np.linspace(-1., 1., 500)
+        M = np.zeros(xi.size)
+        counter = 0
+        for x in xi:
+            kappa = self.GetCurvature(x, Ue)
+            M[counter] = -self.E * self.I * kappa # the spanish convention is positive when tension in lower fibre
+            counter += 1
+        pl.plot(xi * self.Length / 2. + x_c, M, label="M(x)") # transformed to X
+        pl.grid()
+        pl.legend()
+        pl.show()
+    # ------------------------------------------------------------------------------------------------
+    def PrintShearForceFromNodalValues(self, Ue):
+        x_c = 0.5*(self.Nodes[0].x + self.Nodes[1].x)
+        xi = np.linspace(-1.0, 1.0, 500)
+        V = np.zeros(xi.size)
+        counter = 0
+        for x in xi:
+            gamma_xy = self.GetShearStrain(x, Ue)
+            V[counter] = self.G * self.As * gamma_xy
+            counter += 1
+        pl.plot(xi * self.Length / 2. + x_c, V, label="V(x)") # transformed to X
+        pl.grid()
+        # y_ticks = np.arange(-1100, 0, 100)
+        # pl.yticks(y_ticks, fontsize = 12)
+        pl.legend()
+        pl.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
+        pl.show()
