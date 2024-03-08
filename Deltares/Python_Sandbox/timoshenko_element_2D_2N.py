@@ -9,6 +9,23 @@ Felippa and Oñate, "Accurate Timoshenko Beam Elements For Linear Elastostatics 
 
 In this file we derive the main equations of 2-noded Timoshenko FE, firstly using a closed stiffness form (K) and then by integration (int BtDB dV)
 
+Notation:
+
+- El        : Axial strain (du0 / dx)
+- Gamma_xy  : Shear strain
+- Kappa     : curvature (d Theta / dx)
+- E         : Young modulus
+- A         : Cross section area
+- I         : Inertia
+- nu        : Poisson ratio
+- G         : Shear modulus
+- Phi       : Shear slenderness
+- J         : Jacobian to the isoparametric space
+
+- Nu        : Axial displacement shape functions
+- N_theta   : Rotation shape functions
+- N         : Transverse displacement shape functions
+
 """
 
 class TimoshenkoElement2D2N():
@@ -104,15 +121,22 @@ class TimoshenkoElement2D2N():
         shape_functions_third_derivatives_values[3] = 6.0   / (one_plus_phi * self.Length**2)
         return shape_functions_third_derivatives_values
     # ------------------------------------------------------------------------------------------------
+    def GetAxialStrain(self, xi, Ue): # Ue complete 6 components
+        Nu_derivatives = self.GetN_u_Derivatives(xi)
+        return Nu_derivatives[0] * Ue[0] + Nu_derivatives[1] * Ue[3]
+    # ------------------------------------------------------------------------------------------------
     def GetCurvature(self, xi, U_e): # kappa = N_theta_derivative * U_e
         N_theta_derivatives = self.GetN_theta_derivatives(xi)
-        return np.dot(N_theta_derivatives, U_e)
+        # np.dot(N_theta_derivatives, U_e) in global size
+        return N_theta_derivatives[0] * U_e[1] + N_theta_derivatives[1] * U_e[2] + N_theta_derivatives[2] * U_e[4] + N_theta_derivatives[3] * U_e[5]
 
     # ------------------------------------------------------------------------------------------------
-    def GetShearStrain(self, xi, U_e): # kappa = N_theta_derivative * U_e
+    def GetShearStrain(self, xi, U_e): # kappa = N_theta_derivative * U_e, Ue only v and theta
         N_theta = self.GetN_theta(xi)
         N_derivatives = self.GetFirstDerivativesShapeFunctionsValues(xi)
-        return np.dot(N_derivatives - N_theta, U_e)
+        N_s = N_derivatives - N_theta
+        # np.dot(N_derivatives - N_theta, U_e), U_e) in global size
+        return N_s[0] * U_e[1] + N_s[1] * U_e[2] + N_s[2] * U_e[4] + N_s[3] * U_e[5]
     # ------------------------------------------------------------------------------------------------
     def GetN_theta(self, xi): # theta = N_theta * U_e
         # These shape functions are used to interpolate the total rotation Theta
@@ -173,7 +197,44 @@ class TimoshenkoElement2D2N():
             K += np.outer(global_size_N, global_size_N) * self.dV_dgamma() * w_ip * self.J
         return K
     # ------------------------------------------------------------------------------------------------
-    def CalculateInternalForcesVector(self, IntegrationOrder = 2)
+    def CalculateInternalForcesVector(self, Ue, IntegrationOrder = 2):
+        F_int = np.zeros(6)
+
+        integration_point_w = self.GetIntegrationPoints(IntegrationOrder)
+        # Integration loop
+        for IP in range(IntegrationOrder):
+            global_size_N = np.zeros(6)
+            x_ip = integration_point_w[IP, 0]
+            w_ip = integration_point_w[IP, 1]
+
+            # The axial contributions...
+            N_u_derivatives = self.GetN_u_Derivatives(x_ip)
+            global_size_N[0] = N_u_derivatives[0]
+            global_size_N[3] = N_u_derivatives[1]
+            N = self.GetAxialStrain(x_ip, Ue) * self.dN_dEl()
+            F_int += global_size_N * N * w_ip * self.J # we add the Jacobian of the isoparametric space
+
+            # The bending contributions...
+            global_size_N = np.zeros(6)
+            N_theta_derivatives = self.GetN_theta_derivatives(x_ip)
+            global_size_N[1] = N_theta_derivatives[0]
+            global_size_N[2] = N_theta_derivatives[1]
+            global_size_N[4] = N_theta_derivatives[2]
+            global_size_N[5] = N_theta_derivatives[3]
+            M = self.GetCurvature(x_ip, Ue) * self.dM_dkappa()
+            F_int += global_size_N * M * w_ip * self.J
+
+            # The shear contributions...
+            global_size_N = np.zeros(6)
+            N_theta = self.GetN_theta(x_ip)
+            N_derivatives = self.GetFirstDerivativesShapeFunctionsValues(x_ip)
+            global_size_N[1] = N_derivatives[0] - N_theta[0]
+            global_size_N[2] = N_derivatives[1] - N_theta[1]
+            global_size_N[4] = N_derivatives[2] - N_theta[2]
+            global_size_N[5] = N_derivatives[3] - N_theta[3]
+            V = self.GetShearStrain(x_ip, Ue) * self.dV_dgamma()
+            F_int += global_size_N * V * w_ip * self.J
+        return F_int
     # ------------------------------------------------------------------------------------------------
 
     def ApplyBoundaryConditionsToK(self, K, FixedDoFArray):
@@ -187,7 +248,7 @@ class TimoshenkoElement2D2N():
         return K_bc
 
     # PRINT METHODS #
-    def PrintStrainKinematics(self, U_e):
+    def PrintStrainKinematics(self, U_e): # U_e global size (6)
         xi = np.linspace(-1, 1, 500)
         kappa = np.zeros(xi.size)
         gamma = np.zeros(xi.size)
