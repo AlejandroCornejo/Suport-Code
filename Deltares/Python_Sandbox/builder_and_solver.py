@@ -4,6 +4,9 @@ import numpy as np
 def SolveSystem(K, f): # returns u
     return np.dot(np.linalg.inv(K), f)
 
+def ComputeReactions(K, u):
+    return np.dot(K, u)
+
 def BuildGlobalSystemContribution(Kglobal, Klocal, ElementDoFList):
     local_size = np.shape(Klocal)[0]
     for row in range(local_size):

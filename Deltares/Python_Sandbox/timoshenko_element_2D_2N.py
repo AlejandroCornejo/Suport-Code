@@ -285,29 +285,39 @@ class TimoshenkoElement2D2N():
         pl.legend()
         pl.show()
     # ------------------------------------------------------------------------------------------------
-    def PrintDeflectionCurveFromNodalValues(self, U_e): # U_e = {v1, rot1, v2, rot2}
+    def PrintDeflectionCurveFromNodalValues(self, U_e): # U_e = {u01, v1, rot1, u02, v2, rot2}
         x_c = 0.5*(self.Nodes[0].x + self.Nodes[1].x)
         xi = np.linspace(-1, 1, 500)
         deflection = np.zeros(xi.size)
         counter = 0
+        global_size_shape_functions = np.zeros(6)
         for x in xi:
             shape_functions_values = self.GetShapeFunctionsValues(x)
-            deflection[counter] = np.dot(shape_functions_values, U_e) # v = N·u
+            global_size_shape_functions[1] = shape_functions_values[0]
+            global_size_shape_functions[2] = shape_functions_values[1]
+            global_size_shape_functions[4] = shape_functions_values[2]
+            global_size_shape_functions[5] = shape_functions_values[3]
+            deflection[counter] = np.dot(global_size_shape_functions, U_e) # v = N·u
             counter += 1
         pl.plot(xi * self.Length / 2 + x_c, deflection, label="v(x)", linewidth=2) # transformed to X
         pl.grid()
         pl.legend()
         pl.show()
     # ------------------------------------------------------------------------------------------------
-    def PrintRotationCurveFromNodalValues(self, U_e): # U_e = {v1, rot1, v2, rot2}
+    def PrintRotationCurveFromNodalValues(self, U_e): # U_e = {u01, v1, rot1, u02, v2, rot2}
         x_c = 0.5*(self.Nodes[0].x + self.Nodes[1].x)
         xi = np.linspace(-1, 1, 500)
         rotation = np.zeros(xi.size)
         counter = 0
         one_plus_phi = 1.0 + self.Phi
+        global_size_shape_functions = np.zeros(6)
         for x in xi:
             N_theta = self.GetN_theta(x)
-            rotation[counter] = np.dot(N_theta, U_e)
+            global_size_shape_functions[1] = N_theta[0]
+            global_size_shape_functions[2] = N_theta[1]
+            global_size_shape_functions[4] = N_theta[2]
+            global_size_shape_functions[5] = N_theta[3]
+            rotation[counter] = np.dot(global_size_shape_functions, U_e)
             counter += 1
         pl.plot(xi * self.Length / 2. + x_c, rotation, label="Rotation(x) / N_theta") # transformed to X
         pl.grid()

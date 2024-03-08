@@ -61,7 +61,7 @@ print("--> Case b), Cantilever with a vertical load")
 print("The analytical vert displacement is: ", '{:.5e}'.format(analytical_displ), "m")
 print("The FEM        vert displacement is: ", '{:.5e}'.format(displacement_vector[4]), "m") # OK
 
-reactions = np.dot(K_integrated, displacement_vector)
+reactions = BaS.ComputeReactions(K_integrated, displacement_vector)
 print("The axial reaction    is: ", '{:.5e}'.format(reactions[0]), " N")
 print("The vertical reaction is: ", '{:.5e}'.format(reactions[1]), " N")
 print("The moment reaction   is: ", '{:.5e}'.format(reactions[2]), " Nm\n")
