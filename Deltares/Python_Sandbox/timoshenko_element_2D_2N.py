@@ -32,22 +32,54 @@ class TimoshenkoElement2D2N():
     # ------------------------------------------------------------------------------------------------
     def __init__(self, Node1, Node2, E, I, nu, A):
         self.Nodes = [Node1, Node2]
-        self.E = E
-        self.A = A
-        self.As = A * 5.0 / 6.0 # NOTE depends on the cross section
-        self.I = I
-        self.nu = nu
+        self.E      = E
+        self.A      = A
+        self.As     = A * 5.0 / 6.0 # NOTE depends on the cross section
+        self.I      = I
+        self.nu     = nu
         self.Length = math.sqrt((Node1.x - Node2.x)**2 + (Node1.y - Node2.y)**2)
-        self.G = E / (2.0 * (1.0 + nu))
-        self.Phi = 12.0 * E * I / (self.G * self.As * self.Length**2)
+        self.alpha  = self.GetAlphaAngle()
+        self.G      = E / (2.0 * (1.0 + nu))
+        self.Phi    = 12.0 * E * I / (self.G * self.As * self.Length**2)
         self.IntegrationOrder = 2
-        self.J = self.Length * 0.5
+        self.J      = self.Length * 0.5
     # ------------------------------------------------------------------------------------------------
     def GetDoFList(self):
         dofs = np.zeros(4)
         dofs[0], dofs[1] = self.Nodes[0].GetDoFList()
         dofs[2], dofs[3] = self.Nodes[1].GetDoFList()
         return dofs
+    # ------------------------------------------------------------------------------------------------
+    def GetAlphaAngle(self):
+        node_1 = self.Nodes[0]
+        node_2 = self.Nodes[1]
+        delta_x = node_2.x - node_1.x
+        delta_y = node_2.y - node_1.y
+        if abs(delta_x) > 0.0:
+            return math.atan((node_2.y - node_1.y) / (node_2.x - node_1.x))
+        else:
+            return 0.5 * math.pi
+    # ------------------------------------------------------------------------------------------------
+    def CalculateRotationMatrix(self):
+        T = np.zeros((3, 3))
+        c = math.cos(self.alpha)
+        s = math.sin(self.alpha)
+        T[0,0] = c
+        T[0,1] = -s
+        T[1,0] = -s
+        T[1,1] = c
+        T[2,2] = 1.0
+        return T
+    # ------------------------------------------------------------------------------------------------
+    def RotateK(self, K): # we rotate and return, from local to global
+        # Kaa = K[:3, :3]  Kab = K[:3, 3:]   Kba = K[3:, :3]   Kbb = K[3:, 3:]
+        T = self.CalculateRotationMatrix()
+        Tt = np.transpose(T)
+        K[:3, :3] = np.dot(T, np.dot(K[:3, :3], Tt))
+        K[:3, 3:] = np.dot(T, np.dot(K[:3, 3:], Tt))
+        K[3:, :3] = np.dot(T, np.dot(K[3:, :3], Tt))
+        K[3:, 3:] = np.dot(T, np.dot(K[3:, 3:], Tt))
+        return K
     # ------------------------------------------------------------------------------------------------
     def dN_dEl(self): # This method return the derivative of the axial force with respect to the axial strain El
         return self.E * self.A

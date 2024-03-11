@@ -17,6 +17,7 @@ E = 2.1e9  # Pa
 nu = 0.3   # -
 A = 116.0e-4  # m2
 I = 48200.0e-8 # m4
+L = 5.0
 
 # Loads
 P = -1e3 # N
@@ -24,7 +25,7 @@ M = 5e3   # Nm
 
 # Nodes
 node_1 = Node2D(1, 0.0, 0.0)
-node_2 = Node2D(2, 5.0, 0.0)
+node_2 = Node2D(2, L, 0.0)
 
 # Element
 element = TimoshenkoElement2D2N(node_1, node_2, E, I, nu, A)
@@ -50,6 +51,9 @@ K_integrated = element.CalculateStiffnessMatrix(2)
 # reactions = np.dot(K_integrated, displacement_vector)
 # print("The axial reaction is: ", '{:.5e}'.format(reactions[0]), " N\n")
 
+
+
+
 # Case b) cantilever with vertical P
 # external force vector f = {Px1, Py1, M1, Px2, Py2, M2}
 
@@ -72,10 +76,9 @@ print("The moment reaction   is: ", '{:.5e}'.format(reactions[2]), " Nm\n")
 # element.PrintStrainKinematics(displacement_vector)
 # element.PrintShearForceFromNodalValues(displacement_vector)
 
-Fint = element.CalculateInternalForcesVector(displacement_vector)
-Fext = np.dot(K_integrated, displacement_vector)
-print("The residual norm is: ", '{:.5e}'.format(np.linalg.norm(Fint-Fext)))
-
+# Fint = element.CalculateInternalForcesVector(displacement_vector)
+# Fext = np.dot(K_integrated, displacement_vector)
+# print("The residual norm is: ", '{:.5e}'.format(np.linalg.norm(Fint-Fext)))
 
 
 
@@ -98,3 +101,16 @@ print("The residual norm is: ", '{:.5e}'.format(np.linalg.norm(Fint-Fext)))
 # print("The vertical reaction is: ", '{:.5e}'.format(reactions[4]), " N")
 # print("The moment reaction   is: ", '{:.5e}'.format(reactions[5]), " Nm\n")
 
+
+
+
+
+# element.RotateK(K_integrated)
+# f = np.array([0.0, 0.0, 0.0, P, 0.0, 0.0])
+# K_bc = element.ApplyBoundaryConditionsToK(K_integrated, [0,1,2])
+# displacement_vector = BaS.SolveSystem(K_bc, f)
+# print(displacement_vector)
+# analytical_displ = P*element.Length * (1.0 / (element.G*element.As) + (3.*element.Length**2.-element.Length**2.) / (6.0*E*I))
+# print("--> Case d), Rotated Cantilever with a vertical load")
+# print("The analytical vert displacement is: ", '{:.5e}'.format(analytical_displ), "m")
+# print("The FEM        vert displacement is: ", '{:.5e}'.format(displacement_vector[3]), "m") # OK
