@@ -26,6 +26,7 @@ M = 5e3   # Nm
 # Nodes
 node_1 = Node2D(1, 0.0, 0.0)
 node_2 = Node2D(2, L, 0.0)
+# node_2 = Node2D(2, L, L)
 
 # Element
 element = TimoshenkoElement2D2N(node_1, node_2, E, I, nu, A)
@@ -70,6 +71,7 @@ print("The axial reaction    is: ", '{:.5e}'.format(reactions[0]), " N")
 print("The vertical reaction is: ", '{:.5e}'.format(reactions[1]), " N")
 print("The moment reaction   is: ", '{:.5e}'.format(reactions[2]), " Nm\n")
 
+
 # element.PrintDeflectionCurveFromNodalValues(displacement_vector)
 # element.PrintRotationCurveFromNodalValues(displacement_vector)
 # element.PrintBendingMomentsFromNodalValues(displacement_vector)
@@ -105,7 +107,8 @@ print("The moment reaction   is: ", '{:.5e}'.format(reactions[2]), " Nm\n")
 
 
 
-# element.RotateK(K_integrated)
+element.RotateK(K_integrated)
+print(K_integrated)
 # f = np.array([0.0, 0.0, 0.0, P, 0.0, 0.0])
 # K_bc = element.ApplyBoundaryConditionsToK(K_integrated, [0,1,2])
 # displacement_vector = BaS.SolveSystem(K_bc, f)

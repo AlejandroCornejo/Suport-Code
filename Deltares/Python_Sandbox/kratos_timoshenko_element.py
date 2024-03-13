@@ -66,6 +66,6 @@ LHS = KM.Matrix(6,6)
 RHS = KM.Vector(6)
 
 timoshenko_element.CalculateLocalSystem(LHS, RHS, process_info)
-# print(LHS)
+print(LHS)
 
-print(RHS)
+# print(RHS)

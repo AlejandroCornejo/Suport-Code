@@ -58,7 +58,10 @@ class TimoshenkoElement2D2N():
         if abs(delta_x) > 0.0:
             return math.atan((node_2.y - node_1.y) / (node_2.x - node_1.x))
         else:
-            return 0.5 * math.pi
+            if delta_y > 0.0:
+                return 0.5 * math.pi
+            else:
+                return -0.5 * math.pi
     # ------------------------------------------------------------------------------------------------
     def CalculateRotationMatrix(self):
         T = np.zeros((3, 3))
