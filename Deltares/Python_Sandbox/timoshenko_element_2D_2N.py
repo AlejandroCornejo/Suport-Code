@@ -44,15 +44,22 @@ class TimoshenkoElement2D2N():
         self.IntegrationOrder = 2
         self.J      = self.Length * 0.5
     # ------------------------------------------------------------------------------------------------
+    def GetNumberOfNodes(self):
+        return len(self.Nodes)
+    # ------------------------------------------------------------------------------------------------
     def GetDoFList(self):
         dofs = np.zeros(4)
-        dofs[0], dofs[1] = self.Nodes[0].GetDoFList()
-        dofs[2], dofs[3] = self.Nodes[1].GetDoFList()
+        for i in range(self.GetNumberOfNodes()):
+            dofs[2*i], dofs[2*i+1] = self.Nodes[i].GetDoFList()
         return dofs
     # ------------------------------------------------------------------------------------------------
     def GetAlphaAngle(self):
         node_1 = self.Nodes[0]
-        node_2 = self.Nodes[1]
+        node_2 = []
+        if (self.GetNumberOfNodes() == 2):
+            node_2 = self.Nodes[1]
+        else:
+            node_2 = self.Nodes[2]
         delta_x = node_2.x - node_1.x
         delta_y = node_2.y - node_1.y
         if abs(delta_x) > 0.0:
@@ -69,7 +76,7 @@ class TimoshenkoElement2D2N():
         s = math.sin(self.alpha)
         T[0,0] = c
         T[0,1] = -s
-        T[1,0] = -s
+        T[1,0] = s
         T[1,1] = c
         T[2,2] = 1.0
         return T
@@ -103,6 +110,11 @@ class TimoshenkoElement2D2N():
             return np.matrix([[-math.sqrt(3.0/5.0), 5.0 / 9.0],
                                [0.0               , 8.0 / 9.0],
                                [math.sqrt(3.0/5.0), 5.0 / 9.0]])
+        elif IntegrationOrder == 4:
+            return np.matrix([[ -0.861136, 0.347855],
+                               [-0.339981,0.652145],
+                               [ 0.339981,0.652145],
+                               [ 0.861136, 0.347855]])
 
     # ------------------------------------------------------------------------------------------------
     def CalculateDirectK(self):
@@ -343,6 +355,7 @@ class TimoshenkoElement2D2N():
         x_c = 0.5*(self.Nodes[0].x + self.Nodes[1].x)
         xi = np.linspace(-1, 1, 500)
         rotation = np.zeros(xi.size)
+        # rotation_trial = np.zeros(xi.size)
         counter = 0
         one_plus_phi = 1.0 + self.Phi
         global_size_shape_functions = np.zeros(6)
@@ -353,8 +366,24 @@ class TimoshenkoElement2D2N():
             global_size_shape_functions[4] = N_theta[2]
             global_size_shape_functions[5] = N_theta[3]
             rotation[counter] = np.dot(global_size_shape_functions, U_e)
+
+            # N_deriv = self.GetFirstDerivativesShapeFunctionsValues(x)
+            # N_third_deriv = self.GetThirdDerivativesShapeFunctionsValues(x)
+            # global_size_shape_functions[1] = N_deriv[0]
+            # global_size_shape_functions[2] = N_deriv[1]
+            # global_size_shape_functions[4] = N_deriv[2]
+            # global_size_shape_functions[5] = N_deriv[3]
+            # rotation_trial[counter] = np.dot(global_size_shape_functions, U_e)
+            # global_size_shape_functions[1] = N_third_deriv[0]
+            # global_size_shape_functions[2] = N_third_deriv[1]
+            # global_size_shape_functions[4] = N_third_deriv[2]
+            # global_size_shape_functions[5] = N_third_deriv[3]
+            # rotation_trial[counter] += np.dot(global_size_shape_functions, U_e) * self.Phi * self.Length**2 / 12.0
+
             counter += 1
         pl.plot(xi * self.Length / 2. + x_c, rotation, label="Rotation(x) / N_theta") # transformed to X
+        # pl.plot(xi * self.Length / 2. + x_c, rotation_trial, label="Rotation (x) / Using DEq") # transformed to X
+
         pl.grid()
         pl.legend()
         pl.show()

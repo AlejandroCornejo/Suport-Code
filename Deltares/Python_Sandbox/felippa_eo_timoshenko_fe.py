@@ -5,6 +5,7 @@ import math
 import builder_and_solver as BaS
 
 from timoshenko_element_2D_2N import*
+from timoshenko_element_2D_3N import*
 from node_2d import*
 
 """
@@ -24,13 +25,15 @@ P = -1e3 # N
 M = 5e3   # Nm
 
 # Nodes
-node_1 = Node2D(1, 0.0, 0.0)
-node_2 = Node2D(2, L, 0.0)
-# node_2 = Node2D(2, L, L)
+node_1 = Node2D(1, 0.0,   0.0)
+node_2 = Node2D(2, L,     0.0)
+node_3 = Node2D(3, 2.0*L, 0.0)
 
 # Element
 element = TimoshenkoElement2D2N(node_1, node_2, E, I, nu, A)
 K_integrated = element.CalculateStiffnessMatrix(2)
+
+
 
 
 ############################################################
@@ -58,18 +61,18 @@ K_integrated = element.CalculateStiffnessMatrix(2)
 # Case b) cantilever with vertical P
 # external force vector f = {Px1, Py1, M1, Px2, Py2, M2}
 
-f = np.array([0.0, 0.0, 0.0, 0.0, P, 0.0])
-K_bc = element.ApplyBoundaryConditionsToK(K_integrated, [0,1,2])
-displacement_vector = BaS.SolveSystem(K_bc, f)
-analytical_displ = P*element.Length * (1.0 / (element.G*element.As) + (3.*element.Length**2.-element.Length**2.) / (6.0*E*I))
-print("--> Case b), Cantilever with a vertical load")
-print("The analytical vert displacement is: ", '{:.5e}'.format(analytical_displ), "m")
-print("The FEM        vert displacement is: ", '{:.5e}'.format(displacement_vector[4]), "m") # OK
+# f = np.array([0.0, 0.0, 0.0, 0.0, P, 0.0])
+# K_bc = element.ApplyBoundaryConditionsToK(K_integrated, [0,1,2])
+# displacement_vector = BaS.SolveSystem(K_bc, f)
+# analytical_displ = P*element.Length * (1.0 / (element.G*element.As) + (3.*element.Length**2.-element.Length**2.) / (6.0*E*I))
+# print("--> Case b), Cantilever with a vertical load")
+# print("The analytical vert displacement is: ", '{:.5e}'.format(analytical_displ), "m")
+# print("The FEM        vert displacement is: ", '{:.5e}'.format(displacement_vector[4]), "m") # OK
 
-reactions = BaS.ComputeReactions(K_integrated, displacement_vector)
-print("The axial reaction    is: ", '{:.5e}'.format(reactions[0]), " N")
-print("The vertical reaction is: ", '{:.5e}'.format(reactions[1]), " N")
-print("The moment reaction   is: ", '{:.5e}'.format(reactions[2]), " Nm\n")
+# reactions = BaS.ComputeReactions(K_integrated, displacement_vector)
+# print("The axial reaction    is: ", '{:.5e}'.format(reactions[0]), " N")
+# print("The vertical reaction is: ", '{:.5e}'.format(reactions[1]), " N")
+# print("The moment reaction   is: ", '{:.5e}'.format(reactions[2]), " Nm\n")
 
 
 # element.PrintDeflectionCurveFromNodalValues(displacement_vector)
@@ -107,8 +110,8 @@ print("The moment reaction   is: ", '{:.5e}'.format(reactions[2]), " Nm\n")
 
 
 
-element.RotateK(K_integrated)
-print(K_integrated)
+# element.RotateK(K_integrated)
+# print(K_integrated)
 # f = np.array([0.0, 0.0, 0.0, P, 0.0, 0.0])
 # K_bc = element.ApplyBoundaryConditionsToK(K_integrated, [0,1,2])
 # displacement_vector = BaS.SolveSystem(K_bc, f)
@@ -117,3 +120,17 @@ print(K_integrated)
 # print("--> Case d), Rotated Cantilever with a vertical load")
 # print("The analytical vert displacement is: ", '{:.5e}'.format(analytical_displ), "m")
 # print("The FEM        vert displacement is: ", '{:.5e}'.format(displacement_vector[3]), "m") # OK
+
+
+
+
+
+
+# 3 noded element
+
+element_3N = TimoshenkoElement2D3N(node_1, node_2, node_3, E, I, nu, A)
+
+u_E = np.array([0.25,0,0,0,0,0])
+N = element_3N.GetShapeFunctionsValues(-1)
+print(N)
+print(np.dot(u_E, N))

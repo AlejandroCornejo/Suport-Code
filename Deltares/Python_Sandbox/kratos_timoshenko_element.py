@@ -10,6 +10,10 @@ model_part.AddNodalSolutionStepVariable(KM.DISPLACEMENT_X)
 model_part.AddNodalSolutionStepVariable(KM.DISPLACEMENT_Y)
 model_part.AddNodalSolutionStepVariable(KM.ROTATION_Z)
 
+model_part.AddNodalSolutionStepVariable(KM.REACTION_X)
+model_part.AddNodalSolutionStepVariable(KM.REACTION_Y)
+model_part.AddNodalSolutionStepVariable(KM.MOMENT_Z)
+
 L = 5.0
 P = -1e3
 
