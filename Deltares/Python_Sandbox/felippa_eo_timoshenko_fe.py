@@ -27,6 +27,7 @@ M = 5e3   # Nm
 # Nodes
 node_1 = Node2D(1, 0.0,   0.0)
 node_2 = Node2D(2, L,     0.0)
+# node_2 = Node2D(2, 2.0*L,     0.0)
 node_3 = Node2D(3, 2.0*L, 0.0)
 
 # Element
@@ -130,7 +131,19 @@ K_integrated = element.CalculateStiffnessMatrix(2)
 
 element_3N = TimoshenkoElement2D3N(node_1, node_2, node_3, E, I, nu, A)
 
-u_E = np.array([0.25,0,0,0,0,0])
-N = element_3N.GetShapeFunctionsValues(-1)
-print(N)
-print(np.dot(u_E, N))
+K_3N = element_3N.CalculateStiffnessMatrix(4)
+f = np.zeros(9)
+f[7] = P
+K_3N_bc = element.ApplyBoundaryConditionsToK(K_3N, [0,1,2])
+displacement = BaS.SolveSystem(K_3N_bc, f)
+# print(displacement)
+
+# analytical_displ = P*element_3N.Length * ((3.*element_3N.Length**2.-element_3N.Length**2.) / (6.0*E*I)) # EB ok
+analytical_displ = P*element_3N.Length * (1.0 / (element_3N.G*element_3N.As) + (3.*element_3N.Length**2.-element_3N.Length**2.) / (6.0*E*I))
+print("--> Case b), Cantilever with a vertical load")
+print("The analytical vert displacement is: ", '{:.5e}'.format(analytical_displ), "m")
+print("The FEM        vert displacement is: ", '{:.5e}'.format(displacement[7]), "m")
+
+
+
+# print(K_3N)

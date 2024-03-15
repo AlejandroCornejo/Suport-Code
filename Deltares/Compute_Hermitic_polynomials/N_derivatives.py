@@ -94,3 +94,19 @@ d3(N[3])/d(xi3) = 60*xi**2*(-4.0*L*phi - 4.0*L)/(160.0*phi**2 - 40.0*phi - 8.0) 
 d3(N[4])/d(xi3) = 360.0*xi**2/(160.0*phi**2 - 40.0*phi - 8.0) - 96.0*xi/(32.0*phi + 8.0) + 6*(-40.0*phi - 10.0)/(160.0*phi**2 - 40.0*phi - 8.0)
 d3(N[5])/d(xi3) = 24*L*xi/(32.0*phi + 8.0) + 6*L/(160.0*phi**2 - 40.0*phi - 8.0) + 60*xi**2*(2.0*L*phi - L)/(160.0*phi**2 - 40.0*phi - 8.0)
 '''
+
+# Compute derivatives of each N_i with respect to xi
+N_fourth_derivatives = [sp.diff(sp.diff(sp.diff(sp.diff(N_i, xi), xi), xi), xi) for N_i in N]
+
+# Print the derivatives
+for i, N_fourth_derivatives in enumerate(N_fourth_derivatives):
+    print(f"d4(N[{i}])/d(xi4) =", N_fourth_derivatives)
+
+'''
+d4(N[0])/d(xi4) = -720.0*xi/(160.0*phi**2 - 40.0*phi - 8.0) - 96.0/(32.0*phi + 8.0)
+d4(N[1])/d(xi4) = -24*L/(32.0*phi + 8.0) + 120*xi*(2.0*L*phi - L)/(160.0*phi**2 - 40.0*phi - 8.0)
+d4(N[2])/d(xi4) = 192.0/(32.0*phi + 8.0)
+d4(N[3])/d(xi4) = 120*xi*(-4.0*L*phi - 4.0*L)/(160.0*phi**2 - 40.0*phi - 8.0)
+d4(N[4])/d(xi4) = 720.0*xi/(160.0*phi**2 - 40.0*phi - 8.0) - 96.0/(32.0*phi + 8.0)
+d4(N[5])/d(xi4) = 24*L/(32.0*phi + 8.0) + 120*xi*(2.0*L*phi - L)/(160.0*phi**2 - 40.0*phi - 8.0)
+'''

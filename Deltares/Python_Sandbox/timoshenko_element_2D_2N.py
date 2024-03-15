@@ -112,8 +112,8 @@ class TimoshenkoElement2D2N():
                                [math.sqrt(3.0/5.0), 5.0 / 9.0]])
         elif IntegrationOrder == 4:
             return np.matrix([[ -0.861136, 0.347855],
-                               [-0.339981,0.652145],
-                               [ 0.339981,0.652145],
+                               [-0.339981, 0.652145],
+                               [ 0.339981, 0.652145],
                                [ 0.861136, 0.347855]])
 
     # ------------------------------------------------------------------------------------------------
@@ -168,6 +168,9 @@ class TimoshenkoElement2D2N():
         shape_functions_third_derivatives_values[3] = 6.0   / (one_plus_phi * self.Length**2)
         return shape_functions_third_derivatives_values
     # ------------------------------------------------------------------------------------------------
+    def GetFourthDerivativesShapeFunctionsValues(self, xi):
+        return np.zeros(4)
+    # ------------------------------------------------------------------------------------------------
     def GetAxialStrain(self, xi, Ue): # Ue complete 6 components
         Nu_derivatives = self.GetN_u_Derivatives(xi)
         return Nu_derivatives[0] * Ue[0] + Nu_derivatives[1] * Ue[3]
@@ -178,7 +181,7 @@ class TimoshenkoElement2D2N():
         return N_theta_derivatives[0] * U_e[1] + N_theta_derivatives[1] * U_e[2] + N_theta_derivatives[2] * U_e[4] + N_theta_derivatives[3] * U_e[5]
 
     # ------------------------------------------------------------------------------------------------
-    def GetShearStrain(self, xi, U_e): # kappa = N_theta_derivative * U_e, Ue only v and theta
+    def GetShearStrain(self, xi, U_e):
         N_theta = self.GetN_theta(xi)
         N_derivatives = self.GetFirstDerivativesShapeFunctionsValues(xi)
         N_s = N_derivatives - N_theta
