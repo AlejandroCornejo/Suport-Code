@@ -44,16 +44,16 @@ Output:
 
 # let's check...
 L = 1.0
-phi = 0.5
-v1 = 0.1
-v2 = 0.25
-v3 = 0.0
-theta1 = -0.0025
-theta2 = 0.001
-theta3 = -0.25
+phi = 0.0
+v1     = 0
+v2     = 1
+v3     = 0.0
+theta1 = 0
+theta2 = 0
+theta3 = 0
 
 a_0 = v2
-a_1 = (-L*phi*theta1 - 18.0*L*phi*theta2 - L*phi*theta3 - 2.0*L*theta2 - 40.0*phi**2*v1 + 40.0*phi**2*v3 - 10.0*phi*v1 + 10.0*phi*v3) / (80.0*phi**2 - 20.0*phi - 4.0)
+a_1 = (-L*phi*theta1 - 18.0*L*phi*theta2 - L*phi*theta3 - 2.0*L*theta2 - 40.0*phi**2*v1 + 40.0*phi**2*v3 - 10.0*phi*v1 + 10.0*phi*v3)/(80.0*phi**2 - 20.0*phi - 4.0)
 a_2 =  (L*theta1 - L*theta3 + 16.0*phi*v1 - 32.0*phi*v2 + 16.0*phi*v3 + 8.0*v1 - 16.0*v2 + 8.0*v3)/(32.0*phi + 8.0)
 a_3 = (40.0*L*phi*theta2 + L*theta1 + 8.0*L*theta2 + L*theta3 + 40.0*phi*v1 - 40.0*phi*v3 + 10.0*v1 - 10.0*v3)/(160.0*phi**2 - 40.0*phi - 8.0)
 a_4 = (-L*theta1 + L*theta3 - 4.0*v1 + 8.0*v2 - 4.0*v3)/(32.0*phi + 8.0)
@@ -81,7 +81,7 @@ N1_bar =    (-L*phi) / (80.0*phi**2 - 20.0*phi - 4.0) * xi +
 
 -> v2
 N2 =  1.0 + 
-      (- 32.0*phi  - 16.0 )/(32.0*phi + 8.0) * xi**2
+      (- 32.0*phi  - 16.0 )/(32.0*phi + 8.0) * xi**2 +
       (8.0)/(32.0*phi + 8.0) * xi**4
 
 -> theta2
@@ -117,4 +117,38 @@ def ComputeTheta(a0, a1, a2, a3, a4, a5, L, phi, xi):
 # print("The calculated v at xi= 0 is: ", ComputeV(a_0, a_1, a_2, a_3, a_4, a_5, L,  0))
 # print("The calculated v at xi= 1 is: ", ComputeV(alpha_0, alpha_1, alpha_2, alpha_3,  1))
 # print("The calculated Theta at xi=-1 is: ", ComputeTheta(a_0, a_1, a_2, a_3, a_4, a_5, L, phi, -1))
+
+def ComputeN(L, phi, xi):
+    N = np.array(6)
+    N[0] = (-40.0*phi**2 - 10.0*phi) / (80.0*phi**2 - 20.0*phi - 4.0) * xi + \
+            (16.0*phi + 8.0 )/(32.0*phi + 8.0) * xi**2 + \
+            (40.0*phi + 10.0 )/(160.0*phi**2 - 40.0*phi - 8.0) * xi**3 + \
+            (- 4.0 )/(32.0*phi + 8.0) * xi**4 + \
+            (- 6.0 )/(160.0*phi**2 - 40.0*phi - 8.0) * xi**5
+
+    N[1] = (-L*phi) / (80.0*phi**2 - 20.0*phi - 4.0) * xi + \
+            (L)/(32.0*phi + 8.0) * xi**2 + \
+            (L)/(160.0*phi**2 - 40.0*phi - 8.0) * xi**3 + \
+            (-L)/(32.0*phi + 8.0) * xi**4 + \
+            (2.0*L*phi - L)/(160.0*phi**2 - 40.0*phi - 8.0) * xi**5
+    N[2] =  1.0 + \
+      (- 32.0*phi  - 16.0 )/(32.0*phi + 8.0) * xi**2 + \
+      (8.0)/(32.0*phi + 8.0) * xi**4
+    
+    N[3] = (- 18.0*L*phi - 2.0*L ) / (80.0*phi**2 - 20.0*phi - 4.0) * xi + \
+         (40.0*L*phi + 8.0*L)/(160.0*phi**2 - 40.0*phi - 8.0) * xi**3 + \
+         (- 4.0*L*phi  - 4.0*L)/(160.0*phi**2 - 40.0*phi - 8.0) * xi**5
+    
+    N[4] = (40.0*phi**2 + 10.0*phi) / (80.0*phi**2 - 20.0*phi - 4.0) * xi + \
+            (16.0*phi + 8.0)/(32.0*phi + 8.0) * xi**2 + \
+            (- 40.0*phi - 10.0)/(160.0*phi**2 - 40.0*phi - 8.0) * xi**3 +\
+            (- 4.0)/(32.0*phi + 8.0) * xi**4 +\
+            (6.0)/(160.0*phi**2 - 40.0*phi - 8.0) * xi**5
+
+    N[5] = (- L*phi ) / (80.0*phi**2 - 20.0*phi - 4.0) * xi + \
+         (- L)/(32.0*phi + 8.0) * xi**2 + \
+         (L)/(160.0*phi**2 - 40.0*phi - 8.0) * xi**3 + \
+         (L)/(32.0*phi + 8.0) * xi**4 + \
+         (2.0*L*phi - L)/(160.0*phi**2 - 40.0*phi - 8.0) * xi**5
+    return N
 
