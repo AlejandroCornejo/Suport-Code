@@ -18,7 +18,7 @@ E = 2.1e9  # Pa
 nu = 0.3   # -
 A = 116.0e-4  # m2
 I = 48200.0e-8 # m4
-L = 5.0
+L = 20.0
 
 # Loads
 P = -1e3 # N
@@ -61,11 +61,11 @@ K_integrated = element.CalculateStiffnessMatrix(2)
 
 # Case b) cantilever with vertical P
 # external force vector f = {Px1, Py1, M1, Px2, Py2, M2}
-
-# f = np.array([0.0, 0.0, 0.0, 0.0, P, 0.0])
-# K_bc = element.ApplyBoundaryConditionsToK(K_integrated, [0,1,2])
-# displacement_vector = BaS.SolveSystem(K_bc, f)
-# analytical_displ = P*element.Length * (1.0 / (element.G*element.As) + (3.*element.Length**2.-element.Length**2.) / (6.0*E*I))
+print(K_integrated)
+f = np.array([0.0, 0.0, 0.0, 0.0, P, 0.0])
+K_bc = element.ApplyBoundaryConditionsToK(K_integrated, [0,1,2])
+displacement_vector = BaS.SolveSystem(K_bc, f)
+analytical_displ = P*element.Length * (1.0 / (element.G*element.As) + (3.*element.Length**2.-element.Length**2.) / (6.0*E*I))
 # print("--> Case b), Cantilever with a vertical load")
 # print("The analytical vert displacement is: ", '{:.5e}'.format(analytical_displ), "m")
 # print("The FEM        vert displacement is: ", '{:.5e}'.format(displacement_vector[4]), "m") # OK
@@ -128,21 +128,17 @@ K_integrated = element.CalculateStiffnessMatrix(2)
 
 
 # 3 noded element
+# element_3N = TimoshenkoElement2D3N(node_1, node_2, node_3, E, I, nu, A)
+# K_3N = element_3N.CalculateStiffnessMatrix(3)
+# f = np.zeros(9)
+# f[7] = P
+# K_3N_bc = element.ApplyBoundaryConditionsToK(K_3N, [0,1,2])
+# displacement = BaS.SolveSystem(K_3N_bc, f)
 
-element_3N = TimoshenkoElement2D3N(node_1, node_2, node_3, E, I, nu, A)
-
-K_3N = element_3N.CalculateStiffnessMatrix(4)
-f = np.zeros(9)
-f[7] = P
-K_3N_bc = element.ApplyBoundaryConditionsToK(K_3N, [0,1,2])
-displacement = BaS.SolveSystem(K_3N_bc, f)
-# print(displacement)
-
-# analytical_displ = P*element_3N.Length * ((3.*element_3N.Length**2.-element_3N.Length**2.) / (6.0*E*I)) # EB ok
-analytical_displ = P*element_3N.Length * (1.0 / (element_3N.G*element_3N.As) + (3.*element_3N.Length**2.-element_3N.Length**2.) / (6.0*E*I))
-print("--> Case b), Cantilever with a vertical load")
-print("The analytical vert displacement is: ", '{:.5e}'.format(analytical_displ), "m")
-print("The FEM        vert displacement is: ", '{:.5e}'.format(displacement[7]), "m")
+# analytical_displ = P*element_3N.Length * (1.0 / (element_3N.G*element_3N.As) + (3.*element_3N.Length**2.-element_3N.Length**2.) / (6.0*E*I))
+# print("--> Case b), Cantilever with a vertical load")
+# print("The analytical vert displacement is: ", '{:.5e}'.format(analytical_displ), "m")
+# print("The FEM        vert displacement is: ", '{:.5e}'.format(displacement[7]), "m")
 
 
 

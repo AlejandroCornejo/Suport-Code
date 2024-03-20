@@ -17,9 +17,9 @@ model_part.AddNodalSolutionStepVariable(KM.MOMENT_Z)
 L = 20.0
 P = -1e3
 
-node1 = model_part.CreateNewNode(1, 0.0, 0.0, 0.0)
-node2 = model_part.CreateNewNode(2, L,   0.0, 0.0)
-# node2 = model_part.CreateNewNode(2, 0.0,   L, 0.0)
+node1 = model_part.CreateNewNode(1, 0.0,   0.0, 0.0)
+node2 = model_part.CreateNewNode(2, L,     0.0, 0.0)
+node3 = model_part.CreateNewNode(3, 2.0*L, 0.0, 0.0)
 
 node1.AddDof(KM.DISPLACEMENT_X, KM.REACTION_X)
 node1.AddDof(KM.DISPLACEMENT_Y, KM.REACTION_Y)
@@ -28,6 +28,10 @@ node1.AddDof(KM.ROTATION_Z,     KM.MOMENT_Z)
 node2.AddDof(KM.DISPLACEMENT_X, KM.REACTION_X)
 node2.AddDof(KM.DISPLACEMENT_Y, KM.REACTION_Y)
 node2.AddDof(KM.ROTATION_Z,     KM.MOMENT_Z)
+
+node3.AddDof(KM.DISPLACEMENT_X, KM.REACTION_X)
+node3.AddDof(KM.DISPLACEMENT_Y, KM.REACTION_Y)
+node3.AddDof(KM.ROTATION_Z,     KM.MOMENT_Z)
 
 node2.SetSolutionStepValue(KM.DISPLACEMENT_X, 0.001)
 
@@ -43,7 +47,7 @@ properties.SetValue(SMA.I33, 48200.0e-8)
 properties.SetValue(KM.DENSITY, 2400.0)
 properties.SetValue(KM.CONSTITUTIVE_LAW, cl)
 
-geometry = KM.Line2D2(node1, node2)
+geometry = KM.Line2D3(node1, node2, node3)
 
 
 cl_options = KM.Flags()
@@ -61,15 +65,17 @@ cl_values.SetConstitutiveMatrix(const_matrix)
 cl_values.SetElementGeometry(geometry)
 cl_values.SetMaterialProperties(properties)
 
-timoshenko_element = model_part.CreateNewElement("TimoshenkoBeamElement2D2N", 1, geometry, properties)
+timoshenko_element = model_part.CreateNewElement("TimoshenkoBeamElement2D3N", 1, geometry, properties)
 timoshenko_element.Initialize(process_info)
 
 cl.Check(properties, geometry, process_info)
 
-LHS = KM.Matrix(6,6)
-RHS = KM.Vector(6)
+LHS = KM.Matrix(9,9)
+RHS = KM.Vector(9)
 
 timoshenko_element.CalculateLocalSystem(LHS, RHS, process_info)
 print(LHS)
+
+# NOTE: SOLVE LINE 487!!!!!!!!!! IN timoeshenko 2D2N
 
 # print(RHS)
