@@ -109,7 +109,7 @@ def N4_BasisFunctions(xi, KnotVector):
 #----------------------------------------------------------------
 
 # local coordinates of the line
-xi_vector = np.linspace(-1.0, 1.0, 2000)
+xi_vector = np.linspace(0.0, 2.0, 2000)
 
 
 # C0 basis functions
@@ -167,7 +167,7 @@ N4 = np.zeros([knot.size-1-4, xi_vector.size]) # row if each N1_i, columns are v
 
 '''
 Here we begin to compute the K of a 3 Control Points IGA patch with
-quadratic basis functions, 2 elements,  knots = [0,0,0,1,1,1]
+quadratic basis functions, 2 "elements",  knots = [0,0,0,1,1,1]
       0           1           2
     O-----------O-----------O
 
@@ -188,9 +188,9 @@ L = 2.0
 
 
 # Element 1
-L1 = 1.0
-xc1 = 0.5
-J1 = 0.5*L1
+L1 = 1.0   # length of the element
+xc1 = 0.5  # center of the element
+J1 = 0.5*L1 # Jacobian
 x_ip = L1*xi_ip*0.5 + xc1 # relation between xi and x, xi = 2 / L * (x - xc)
 K1 = np.zeros([3, 3])
 N2_derivatives = N2_DerivativesBasisFunctions(x_ip, knot) # These derivatives are in the parametric space
