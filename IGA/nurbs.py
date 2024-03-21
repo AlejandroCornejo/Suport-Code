@@ -61,7 +61,7 @@ def N2_BasisFunctions(xi, KnotVector):
         if denom2 != 0.0:
             N2[i] += (KnotVector[i+p+1] - xi) / denom2 * N1[i+1]
     return N2
-    #----------------------------------------------------------------
+#----------------------------------------------------------------
 def N3_BasisFunctions(xi, KnotVector):
     knot_size = KnotVector.size
     N2 = N2_BasisFunctions(xi, KnotVector)
@@ -77,6 +77,21 @@ def N3_BasisFunctions(xi, KnotVector):
             N3[i] += (KnotVector[i+p+1] - xi) / denom2 * N2[i+1]
     return N3
 #----------------------------------------------------------------
+def N4_BasisFunctions(xi, KnotVector):
+    knot_size = KnotVector.size
+    N3 = N3_BasisFunctions(xi, KnotVector)
+    p = 4
+    n = knot_size - 1 - p
+    N4 = np.zeros(n)
+    for i in range(n):
+        denom1 = (KnotVector[i+p]-KnotVector[i])
+        denom2 = (KnotVector[i+p+1]-KnotVector[i+1])
+        if denom1 != 0.0:
+            N4[i] += (xi - KnotVector[i]) / denom1 * N3[i]
+        if denom2 != 0.0:
+            N4[i] += (KnotVector[i+p+1] - xi) / denom2 * N3[i+1]
+    return N4
+#----------------------------------------------------------------
 
 # local coordinates of the line
 xi_vector = np.linspace(0.0, 1.0, 2000)
@@ -85,13 +100,14 @@ xi_vector = np.linspace(0.0, 1.0, 2000)
 # C0 basis functions
 # knot = np.linspace(0.0, 1.0, 10)
 # knot = np.array([0.0, 0.0 , 0.0, 0.0, 0.4, 0.5, 0.6, 1.0, 1.0, 1.0, 1.0])
-knot = np.array([0.0, 0.0 , 0.0, 0.0,  1.0, 1.0, 1.0, 1.0])
+knot = np.array([0.0, 0.0 , 0.0,  1.0, 1.0, 1.0])
 
 # The number of basis functions is n = m - p - 1 = m - 1
 N0 = np.zeros([knot.size-1,   xi_vector.size]) # row if each N0_i, columns are values of xi
 N1 = np.zeros([knot.size-1-1, xi_vector.size]) # row if each N1_i, columns are values of xi
 N2 = np.zeros([knot.size-1-2, xi_vector.size]) # row if each N1_i, columns are values of xi
 N3 = np.zeros([knot.size-1-3, xi_vector.size]) # row if each N1_i, columns are values of xi
+N4 = np.zeros([knot.size-1-4, xi_vector.size]) # row if each N1_i, columns are values of xi
 
 
 # for counter, xi in enumerate(xi_vector):
@@ -106,16 +122,21 @@ N3 = np.zeros([knot.size-1-3, xi_vector.size]) # row if each N1_i, columns are v
 #     pl.plot(xi_vector, N1[i, :] , label="N_1_" + str(i))
 
 
-# for counter, xi in enumerate(xi_vector):
-#     N2[:, counter] = N2_BasisFunctions(xi, knot)
-# for i in range(knot.size - 1 - 2):
-#     pl.plot(xi_vector, N2[i, :] , label="N_2_" + str(i))
-
-
 for counter, xi in enumerate(xi_vector):
-    N3[:, counter] = N3_BasisFunctions(xi, knot)
-for i in range(knot.size - 1 - 3):
-    pl.plot(xi_vector, N3[i, :] , label="N_3_" + str(i))
+    N2[:, counter] = N2_BasisFunctions(xi, knot)
+for i in range(knot.size - 1 - 2):
+    pl.plot(xi_vector, N2[i, :] , label="N_2_" + str(i))
+
+
+# for counter, xi in enumerate(xi_vector):
+#     N3[:, counter] = N3_BasisFunctions(xi, knot)
+# for i in range(knot.size - 1 - 3):
+#     pl.plot(xi_vector, N3[i, :] , label="N_3_" + str(i))
+
+# for counter, xi in enumerate(xi_vector):
+#     N4[:, counter] = N4_BasisFunctions(xi, knot)
+# for i in range(knot.size - 1 - 4):
+#     pl.plot(xi_vector, N4[i, :] , label="N_4_" + str(i))
 
 
 pl.grid()
